@@ -4,336 +4,517 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Masters Pool 2026</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --augusta-green: #006747;
+            --augusta-dark: #004d35;
+            --augusta-deep: #003323;
+            --masters-yellow: #f2c75c;
+            --masters-gold: #d4a843;
+            --cream: #fdf8ef;
+            --cream-dark: #f0e6d3;
+            --azalea: #cf5c78;
+            --text-dark: #1a2e1a;
+            --text-muted: #5a7a5a;
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #0a3d0a;
-            color: #fff;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--cream);
+            color: var(--text-dark);
             min-height: 100vh;
         }
 
+        /* === HEADER === */
         .header {
-            background: linear-gradient(135deg, #064e06, #0a6b0a);
-            text-align: center;
-            padding: 24px 16px 16px;
-            border-bottom: 3px solid #ffd700;
-        }
-
-        .header h1 {
-            font-size: 2rem;
-            color: #ffd700;
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
-            letter-spacing: 2px;
-        }
-
-        .header .subtitle {
-            color: #c0d8c0;
-            font-size: 0.9rem;
-            margin-top: 4px;
-        }
-
-        .prizes {
-            display: flex;
-            justify-content: center;
-            gap: 24px;
-            margin-top: 12px;
-            flex-wrap: wrap;
-        }
-
-        .prize {
-            background: rgba(255,215,0,0.15);
-            border: 1px solid rgba(255,215,0,0.3);
-            border-radius: 8px;
-            padding: 8px 16px;
+            background: var(--augusta-green);
+            position: relative;
+            overflow: hidden;
+            padding: 40px 20px 32px;
             text-align: center;
         }
 
-        .prize .amount {
-            color: #ffd700;
-            font-size: 1.3rem;
-            font-weight: bold;
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background:
+                radial-gradient(ellipse at 20% 80%, rgba(0,80,50,0.6) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 20%, rgba(0,100,60,0.4) 0%, transparent 60%),
+                linear-gradient(180deg, rgba(0,0,0,0.15) 0%, transparent 40%, rgba(0,0,0,0.1) 100%);
         }
 
-        .prize .label {
-            color: #c0d8c0;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
+        .header-content { position: relative; z-index: 1; }
 
-        .status-bar {
-            background: rgba(0,0,0,0.3);
-            padding: 8px 16px;
-            text-align: center;
-            font-size: 0.8rem;
-            color: #8fbc8f;
-        }
-
-        .status-bar .live-dot {
+        .header-flag {
             display: inline-block;
-            width: 8px;
-            height: 8px;
-            background: #4caf50;
-            border-radius: 50%;
-            margin-right: 6px;
-            animation: pulse 2s infinite;
-        }
-
-        .status-bar.error .live-dot { background: #f44336; animation: none; }
-        .status-bar.loading .live-dot { background: #ff9800; }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.4; }
-        }
-
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 16px;
-        }
-
-        .section-title {
-            font-size: 1.1rem;
-            color: #ffd700;
-            margin: 20px 0 10px;
-            padding-bottom: 6px;
-            border-bottom: 1px solid rgba(255,215,0,0.3);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .trophy { font-size: 1.2rem; }
-
-        /* Pool Standings Table */
-        .standings-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 16px;
-        }
-
-        .standings-table th {
-            background: rgba(0,0,0,0.4);
-            padding: 10px 12px;
-            text-align: left;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #8fbc8f;
-        }
-
-        .standings-table td {
-            padding: 10px 12px;
-            border-bottom: 1px solid rgba(255,255,255,0.08);
-        }
-
-        .standings-table tr:hover {
-            background: rgba(255,255,255,0.05);
-        }
-
-        .standings-table .rank {
-            font-weight: bold;
-            color: #ffd700;
-            width: 32px;
-            text-align: center;
-        }
-
-        .standings-table .rank.first { font-size: 1.1rem; }
-
-        .standings-table .person-name {
-            font-weight: 600;
-            font-size: 1rem;
-        }
-
-        .standings-table .golfer-scores {
-            font-size: 0.85rem;
-            color: #b0c8b0;
-        }
-
-        .standings-table .golfer-score {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            margin-right: 12px;
-        }
-
-        .golfer-status {
-            font-size: 0.7rem;
-            padding: 1px 5px;
-            border-radius: 3px;
-            font-weight: 600;
-        }
-
-        .status-active { color: #4caf50; }
-        .status-cut { color: #f44336; background: rgba(244,67,54,0.15); }
-        .status-wd { color: #ff9800; background: rgba(255,152,0,0.15); }
-
-        .score {
-            font-weight: bold;
-            font-size: 1.1rem;
-            text-align: right;
-            min-width: 50px;
-        }
-
-        .score.under-par { color: #f44336; }
-        .score.over-par { color: #64b5f6; }
-        .score.even-par { color: #fff; }
-
-        .score-cell { text-align: right; }
-
-        .team-ineligible {
-            font-size: 0.7rem;
-            color: #f44336;
-            font-style: italic;
-        }
-
-        .thru {
-            font-size: 0.75rem;
-            color: #8fbc8f;
-        }
-
-        /* Responsive */
-        @media (max-width: 600px) {
-            .header h1 { font-size: 1.5rem; }
-            .standings-table td, .standings-table th { padding: 8px 6px; }
-            .prizes { gap: 12px; }
-            .container { padding: 8px; }
-            .golfer-score { display: block !important; margin-bottom: 2px; }
-        }
-
-        .tab-bar {
-            display: flex;
-            justify-content: center;
-            gap: 4px;
-            margin: 16px 0 8px;
-        }
-
-        .tab {
-            padding: 8px 20px;
-            background: rgba(255,255,255,0.08);
-            border: 1px solid rgba(255,255,255,0.15);
-            border-radius: 6px;
-            cursor: pointer;
-            color: #b0c8b0;
-            font-size: 0.85rem;
-            transition: all 0.2s;
-        }
-
-        .tab.active {
-            background: rgba(255,215,0,0.2);
-            border-color: #ffd700;
-            color: #ffd700;
-            font-weight: 600;
-        }
-
-        .tab:hover { background: rgba(255,255,255,0.12); }
-
-        .hidden { display: none !important; }
-
-        .loading-spinner {
-            text-align: center;
-            padding: 60px 20px;
-            color: #8fbc8f;
-        }
-
-        .loading-spinner .spin {
-            display: inline-block;
-            width: 32px;
-            height: 32px;
-            border: 3px solid rgba(255,215,0,0.2);
-            border-top-color: #ffd700;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
             margin-bottom: 12px;
         }
 
-        @keyframes spin { to { transform: rotate(360deg); } }
+        .flag-pole {
+            display: inline-block;
+            width: 2px;
+            height: 40px;
+            background: linear-gradient(to bottom, #ddd, #999);
+            vertical-align: bottom;
+            margin-right: -2px;
+        }
 
-        .error-msg {
+        .flag-icon {
+            display: inline-block;
+            width: 28px;
+            height: 20px;
+            background: var(--masters-yellow);
+            border-radius: 0 3px 3px 0;
+            vertical-align: top;
+            position: relative;
+            box-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+        }
+
+        .header h1 {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 2.6rem;
+            font-weight: 700;
+            color: var(--masters-yellow);
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        .header .divider {
+            width: 60px;
+            height: 2px;
+            background: var(--masters-yellow);
+            margin: 12px auto;
+            opacity: 0.6;
+        }
+
+        .header .subtitle {
+            font-family: 'Inter', sans-serif;
+            color: rgba(255,255,255,0.7);
+            font-size: 0.85rem;
+            font-weight: 300;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        .prizes-bar {
+            background: var(--augusta-dark);
+            border-bottom: 3px solid var(--masters-yellow);
+            padding: 14px 20px;
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+
+        .prize-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .prize-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+        }
+
+        .prize-icon.gold {
+            background: linear-gradient(135deg, var(--masters-yellow), var(--masters-gold));
+            color: var(--augusta-deep);
+            font-weight: 700;
+        }
+
+        .prize-icon.silver {
+            background: linear-gradient(135deg, #c0c0c0, #a0a0a0);
+            color: #333;
+            font-weight: 700;
+        }
+
+        .prize-info {
+            text-align: left;
+        }
+
+        .prize-amount {
+            color: var(--masters-yellow);
+            font-weight: 700;
+            font-size: 1.05rem;
+        }
+
+        .prize-label {
+            color: rgba(255,255,255,0.5);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* === STATUS BAR === */
+        .status-bar {
+            background: var(--augusta-deep);
+            padding: 8px 16px;
             text-align: center;
-            padding: 40px 20px;
-            color: #f44336;
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.5);
+            letter-spacing: 0.5px;
+        }
+
+        .live-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .live-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #4caf50;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .status-bar.error .live-dot { background: var(--azalea); animation: none; }
+        .status-bar.loading .live-dot { background: var(--masters-yellow); }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(76,175,80,0.4); }
+            50% { opacity: 0.5; box-shadow: 0 0 0 4px rgba(76,175,80,0); }
+        }
+
+        /* === MAIN CONTENT === */
+        .container {
+            max-width: 880px;
+            margin: 0 auto;
+            padding: 20px 16px 40px;
+        }
+
+        /* === TABS === */
+        .tab-bar {
+            display: flex;
+            justify-content: center;
+            gap: 0;
+            margin: 0 0 20px;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .tab {
+            padding: 12px 28px;
+            cursor: pointer;
+            font-size: 0.82rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.25s ease;
+        }
+
+        .tab:hover { color: var(--augusta-green); }
+
+        .tab.active {
+            color: var(--augusta-green);
+            border-bottom-color: var(--augusta-green);
+            font-weight: 600;
         }
 
         .round-info {
             text-align: center;
-            margin: 8px 0 4px;
-            font-size: 0.85rem;
-            color: #8fbc8f;
+            margin: -8px 0 16px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        /* === STANDINGS CARDS === */
+        .standings-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .standing-card {
+            background: #fff;
+            border-radius: 10px;
+            padding: 14px 18px;
+            display: grid;
+            grid-template-columns: 36px 1fr auto;
+            align-items: center;
+            gap: 14px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+            border: 1px solid rgba(0,0,0,0.06);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .standing-card:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+        }
+
+        .standing-card.leader {
+            border: 2px solid var(--masters-yellow);
+            background: linear-gradient(135deg, #fffdf5 0%, #fff9e6 100%);
+            box-shadow: 0 2px 8px rgba(212,168,67,0.15), 0 1px 3px rgba(0,0,0,0.06);
+        }
+
+        .standing-card.ineligible {
+            opacity: 0.55;
+        }
+
+        .card-rank {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+            background: #f5f5f5;
+            color: var(--text-muted);
+        }
+
+        .leader .card-rank {
+            background: linear-gradient(135deg, var(--masters-yellow), var(--masters-gold));
+            color: var(--augusta-deep);
+            font-size: 1rem;
+            box-shadow: 0 2px 6px rgba(212,168,67,0.3);
+        }
+
+        .card-rank.second { background: #e8e8e8; color: #555; }
+        .card-rank.third { background: #f0e0d0; color: #8b6914; }
+
+        .card-body { min-width: 0; }
+
+        .card-owner {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 4px;
+        }
+
+        .card-golfers {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px 14px;
+        }
+
+        .golfer-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .golfer-name { font-weight: 500; }
+
+        .golfer-name.best {
+            color: var(--augusta-green);
+            font-weight: 600;
+        }
+
+        .golfer-tag-score {
+            font-weight: 600;
+            font-size: 0.75rem;
+            padding: 1px 6px;
+            border-radius: 4px;
+            background: #f0f5f0;
+        }
+
+        .golfer-tag-score.under-par { color: var(--azalea); background: #fdf0f3; }
+        .golfer-tag-score.over-par { color: #4a7ab5; background: #f0f4fa; }
+        .golfer-tag-score.even-par { color: #666; background: #f5f5f5; }
+
+        .golfer-badge {
+            font-size: 0.6rem;
+            font-weight: 700;
+            padding: 1px 5px;
+            border-radius: 3px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .badge-cut { color: #fff; background: var(--azalea); }
+        .badge-wd { color: #fff; background: #e6a23c; }
+
+        .card-thru {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+            font-style: italic;
+        }
+
+        .ineligible-note {
+            font-size: 0.7rem;
+            color: var(--azalea);
+            margin-top: 2px;
+            font-weight: 500;
+        }
+
+        .card-score {
+            text-align: right;
+            padding-left: 12px;
+        }
+
+        .score-value {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .score-value.under-par { color: var(--azalea); }
+        .score-value.over-par { color: #4a7ab5; }
+        .score-value.even-par { color: var(--text-dark); }
+
+        .score-label {
+            font-size: 0.6rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 2px;
+        }
+
+        /* === LOADING / ERROR === */
+        .loading-state {
+            text-align: center;
+            padding: 80px 20px;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--cream-dark);
+            border-top-color: var(--augusta-green);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .loading-text {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        .error-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+
+        .error-state p { margin-bottom: 8px; }
+
+        .hidden { display: none !important; }
+
+        /* === FOOTER === */
+        .footer {
+            text-align: center;
+            padding: 24px 16px;
+            font-size: 0.7rem;
+            color: #bbb;
+            letter-spacing: 0.5px;
+        }
+
+        .footer .azalea {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: var(--azalea);
+            border-radius: 50%;
+            margin: 0 4px;
+            opacity: 0.5;
+        }
+
+        /* === RESPONSIVE === */
+        @media (max-width: 600px) {
+            .header { padding: 28px 16px 24px; }
+            .header h1 { font-size: 1.8rem; letter-spacing: 2px; }
+            .prizes-bar { gap: 20px; padding: 12px 16px; }
+            .tab { padding: 10px 16px; font-size: 0.75rem; }
+            .standing-card { padding: 12px 14px; gap: 10px; }
+            .card-owner { font-size: 1rem; }
+            .score-value { font-size: 1.3rem; }
+            .card-golfers { gap: 4px 10px; }
+            .golfer-tag { font-size: 0.75rem; }
         }
     </style>
 </head>
 <body>
+
     <div class="header">
-        <h1>THE MASTERS POOL</h1>
-        <div class="subtitle">Augusta National &bull; 2026 &bull; $25 Buy-In</div>
-        <div class="prizes">
-            <div class="prize">
-                <div class="amount">$125</div>
-                <div class="label">Best Individual Golfer</div>
+        <div class="header-content">
+            <div class="header-flag">
+                <span class="flag-pole"></span><span class="flag-icon"></span>
             </div>
-            <div class="prize">
-                <div class="amount">$75</div>
-                <div class="label">Best Team Score</div>
+            <h1>The Masters Pool</h1>
+            <div class="divider"></div>
+            <div class="subtitle">Augusta National &bull; April 2026 &bull; $25 Buy-In</div>
+        </div>
+    </div>
+
+    <div class="prizes-bar">
+        <div class="prize-item">
+            <div class="prize-icon gold">1st</div>
+            <div class="prize-info">
+                <div class="prize-amount">$125</div>
+                <div class="prize-label">Best Individual Golfer</div>
+            </div>
+        </div>
+        <div class="prize-item">
+            <div class="prize-icon silver">2nd</div>
+            <div class="prize-info">
+                <div class="prize-amount">$75</div>
+                <div class="prize-label">Best Team Score</div>
             </div>
         </div>
     </div>
 
     <div class="status-bar loading" id="statusBar">
-        <span class="live-dot"></span>
-        <span id="statusText">Loading leaderboard...</span>
+        <div class="live-indicator">
+            <span class="live-dot"></span>
+            <span id="statusText">Loading leaderboard...</span>
+        </div>
     </div>
 
     <div class="container">
         <div class="tab-bar">
-            <div class="tab active" data-tab="individual" onclick="switchTab('individual')">Best Golfer ($125)</div>
-            <div class="tab" data-tab="team" onclick="switchTab('team')">Team Score ($75)</div>
+            <div class="tab active" data-tab="individual" onclick="switchTab('individual')">Best Golfer &mdash; $125</div>
+            <div class="tab" data-tab="team" onclick="switchTab('team')">Team Score &mdash; $75</div>
         </div>
 
         <div id="roundInfo" class="round-info"></div>
 
-        <div id="loading" class="loading-spinner">
-            <div class="spin"></div>
-            <div>Fetching live scores from Augusta...</div>
+        <div id="loading" class="loading-state">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">Fetching live scores from Augusta...</div>
         </div>
 
-        <div id="error" class="error-msg hidden"></div>
+        <div id="error" class="error-state hidden"></div>
 
-        <div id="individualView">
-            <table class="standings-table" id="individualTable">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Owner</th>
-                        <th>Best Golfer</th>
-                        <th>Thru</th>
-                        <th class="score-cell">Score</th>
-                    </tr>
-                </thead>
-                <tbody id="individualBody"></tbody>
-            </table>
-        </div>
+        <div id="individualView" class="standings-list hidden"></div>
+        <div id="teamView" class="standings-list hidden"></div>
+    </div>
 
-        <div id="teamView" class="hidden">
-            <table class="standings-table" id="teamTable">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Owner</th>
-                        <th>Golfers</th>
-                        <th class="score-cell">Combined</th>
-                    </tr>
-                </thead>
-                <tbody id="teamBody"></tbody>
-            </table>
-        </div>
+    <div class="footer">
+        A tradition unlike any other <span class="azalea"></span> Auto-updates every 60s
     </div>
 
     <script>
-        // Pool picks
         const POOL = [
             { owner: "Kasey",  picks: ["Scottie Scheffler", "Min Woo Lee"] },
             { owner: "Luke",   picks: ["Bryson DeChambeau", "Brooks Koepka"] },
@@ -345,7 +526,6 @@
             { owner: "Anton",  picks: ["Tommy Fleetwood", "Collin Morikawa"] },
         ];
 
-        // Name matching - map our names to possible ESPN name variations
         const NAME_ALIASES = {
             "Scottie Scheffler": ["scheffler"],
             "Min Woo Lee": ["min woo lee", "m.w. lee", "mw lee", "minwoo lee"],
@@ -370,9 +550,9 @@
 
         function switchTab(tab) {
             currentTab = tab;
-            document.querySelectorAll('.tab').forEach(t => {
-                t.classList.toggle('active', t.dataset.tab === tab);
-            });
+            document.querySelectorAll('.tab').forEach(t =>
+                t.classList.toggle('active', t.dataset.tab === tab)
+            );
             document.getElementById('individualView').classList.toggle('hidden', tab !== 'individual');
             document.getElementById('teamView').classList.toggle('hidden', tab !== 'team');
         }
@@ -380,22 +560,15 @@
         function matchGolfer(espnName, pickName) {
             const espnLower = espnName.toLowerCase().trim();
             const pickLower = pickName.toLowerCase().trim();
-
-            // Direct match
             if (espnLower === pickLower) return true;
             if (espnLower.includes(pickLower) || pickLower.includes(espnLower)) return true;
-
-            // Check aliases
             const aliases = NAME_ALIASES[pickName] || [];
             for (const alias of aliases) {
                 if (espnLower.includes(alias) || alias.includes(espnLower)) return true;
             }
-
-            // Last name match as fallback
             const espnLast = espnLower.split(' ').pop();
             const pickLast = pickLower.split(' ').pop();
             if (espnLast === pickLast && espnLast.length > 3) return true;
-
             return false;
         }
 
@@ -418,49 +591,26 @@
         }
 
         async function fetchLeaderboard() {
-            // ESPN golf leaderboard API for The Masters
-            // Tournament ID for The Masters is typically 401580329 or similar
-            // We'll use the general PGA leaderboard endpoint and find The Masters
-            const urls = [
-                'https://site.api.espn.com/apis/site/v2/sports/golf/pga/scoreboard',
-            ];
+            const resp = await fetch('https://site.api.espn.com/apis/site/v2/sports/golf/pga/scoreboard');
+            if (!resp.ok) throw new Error('ESPN API error');
+            const data = await resp.json();
 
-            for (const url of urls) {
-                try {
-                    const resp = await fetch(url);
-                    if (!resp.ok) continue;
-                    const data = await resp.json();
-
-                    // Find The Masters event
-                    if (data.events && data.events.length > 0) {
-                        let mastersEvent = data.events.find(e =>
-                            e.name && (e.name.toLowerCase().includes('masters') ||
-                            e.name.toLowerCase().includes('augusta'))
-                        );
-
-                        // If no Masters found, use the current/most recent event
-                        if (!mastersEvent) {
-                            mastersEvent = data.events[0];
-                        }
-
-                        return parseESPNEvent(mastersEvent);
-                    }
-                } catch (e) {
-                    console.error('Fetch error:', e);
-                }
+            if (data.events && data.events.length > 0) {
+                let mastersEvent = data.events.find(e =>
+                    e.name && (e.name.toLowerCase().includes('masters') ||
+                    e.name.toLowerCase().includes('augusta'))
+                );
+                if (!mastersEvent) mastersEvent = data.events[0];
+                return parseESPNEvent(mastersEvent);
             }
-
-            throw new Error('Could not fetch leaderboard data');
+            throw new Error('No event data');
         }
 
         function parseESPNEvent(event) {
             const golfers = [];
             const eventName = event.name || 'The Masters';
             let roundInfo = '';
-
-            if (event.status) {
-                roundInfo = event.status;
-            }
+            if (event.status) roundInfo = event.status;
 
             const competitions = event.competitions || [];
             for (const comp of competitions) {
@@ -470,105 +620,107 @@
                 for (const c of competitors) {
                     const athlete = c.athlete || {};
                     const name = athlete.displayName || athlete.shortName || '';
-                    const score = parseScoreFromText(c.score) ?? (c.linescores ? null : null);
+                    const score = parseScoreFromText(c.score);
                     const status = c.status?.type?.name || 'active';
-                    const position = c.status?.position?.displayName || c.sortOrder || '';
-                    const thru = c.status?.thru || c.thru || '';
-                    const today = c.linescores ? null : null;
 
-                    // Parse score from the score display value
                     let totalScore = score;
-                    if (totalScore === null && c.score !== undefined) {
+                    if (totalScore === null && c.score !== undefined)
                         totalScore = parseScoreFromText(String(c.score));
-                    }
-                    // Also check statistics
-                    if (totalScore === null && c.statistics && c.statistics.length > 0) {
+                    if (totalScore === null && c.statistics) {
                         for (const stat of c.statistics) {
-                            if (stat.name === 'scoreToPar') {
+                            if (stat.name === 'scoreToPar')
                                 totalScore = parseScoreFromText(stat.displayValue);
-                            }
                         }
                     }
 
-                    // Determine if cut/WD
                     let playerStatus = 'active';
-                    if (status === 'cut' || (c.status && c.status.type && c.status.type.id === '3')) {
-                        playerStatus = 'CUT';
-                    } else if (status === 'wd' || status === 'withdrawn') {
-                        playerStatus = 'WD';
-                    }
+                    if (status === 'cut' || (c.status?.type?.id === '3')) playerStatus = 'CUT';
+                    else if (status === 'wd' || status === 'withdrawn') playerStatus = 'WD';
 
-                    // Get thru info
                     let thruDisplay = '';
-                    if (c.status && c.status.period) {
+                    if (c.status?.period) {
                         const round = c.status.period;
                         const thruHoles = c.status.thru;
-                        if (thruHoles === 18 || thruHoles === 0) {
-                            thruDisplay = `R${round} F`;
-                        } else if (thruHoles) {
-                            thruDisplay = `R${round} Thru ${thruHoles}`;
-                        } else {
-                            thruDisplay = `R${round}`;
-                        }
+                        if (thruHoles === 18 || thruHoles === 0) thruDisplay = `R${round} F`;
+                        else if (thruHoles) thruDisplay = `R${round} Thru ${thruHoles}`;
+                        else thruDisplay = `R${round}`;
                     }
-
                     if (playerStatus === 'CUT') thruDisplay = 'CUT';
                     if (playerStatus === 'WD') thruDisplay = 'WD';
 
                     golfers.push({
-                        name: name,
-                        score: totalScore !== null ? totalScore : 999,
-                        status: playerStatus,
-                        thru: thruDisplay,
-                        position: position,
+                        name, score: totalScore !== null ? totalScore : 999,
+                        status: playerStatus, thru: thruDisplay,
                         sortOrder: c.sortOrder || 999,
                     });
                 }
             }
-
             return { golfers, eventName, roundInfo };
+        }
+
+        function golferTagHTML(g, isBest) {
+            const scoreText = g.score === 999 ? '-' : formatScore(g.score);
+            const sClass = g.score === 999 ? '' : scoreClass(g.score);
+            let badge = '';
+            if (g.status === 'CUT') badge = '<span class="golfer-badge badge-cut">CUT</span>';
+            if (g.status === 'WD') badge = '<span class="golfer-badge badge-wd">WD</span>';
+
+            return `<div class="golfer-tag">
+                <span class="golfer-name ${isBest ? 'best' : ''}">${g.pickName}</span>
+                <span class="golfer-tag-score ${sClass}">${scoreText}</span>
+                ${badge}
+            </div>`;
         }
 
         function renderStandings(data) {
             const { golfers, eventName, roundInfo } = data;
             lastData = data;
 
-            // Update round info
-            const roundEl = document.getElementById('roundInfo');
-            roundEl.textContent = `${eventName}${roundInfo ? ' \u2022 ' + roundInfo : ''}`;
+            document.getElementById('roundInfo').textContent =
+                `${eventName}${roundInfo ? ' \u2014 ' + roundInfo : ''}`;
 
-            // Match golfers to pool picks
             const poolResults = POOL.map(entry => {
                 const matched = entry.picks.map(pick => {
                     const found = golfers.find(g => matchGolfer(g.name, pick));
-                    if (found) {
-                        return { ...found, pickName: pick };
-                    }
-                    return { name: pick, pickName: pick, score: 999, status: 'N/A', thru: '-', notFound: true };
+                    return found
+                        ? { ...found, pickName: pick }
+                        : { name: pick, pickName: pick, score: 999, status: 'N/A', thru: '-', notFound: true };
                 });
 
-                const bestGolfer = matched.reduce((a, b) =>
-                    (a.score <= b.score) ? a : b
-                );
-
+                const bestGolfer = matched.reduce((a, b) => a.score <= b.score ? a : b);
                 const allActive = matched.every(g => g.status === 'active');
-                const teamScore = allActive
-                    ? matched.reduce((sum, g) => sum + g.score, 0)
-                    : null;
+                const teamScore = allActive ? matched.reduce((sum, g) => sum + g.score, 0) : null;
 
-                return {
-                    owner: entry.owner,
-                    golfers: matched,
-                    bestGolfer,
-                    teamScore,
-                    teamEligible: allActive,
-                };
+                return { owner: entry.owner, golfers: matched, bestGolfer, teamScore, teamEligible: allActive };
             });
 
-            // Sort for individual (best single golfer)
-            const individualSorted = [...poolResults].sort((a, b) => a.bestGolfer.score - b.bestGolfer.score);
+            // Individual view
+            const indSorted = [...poolResults].sort((a, b) => a.bestGolfer.score - b.bestGolfer.score);
+            const indView = document.getElementById('individualView');
+            indView.innerHTML = indSorted.map((entry, i) => {
+                const g = entry.bestGolfer;
+                const scoreText = g.score === 999 ? '-' : formatScore(g.score);
+                const sClass = g.score === 999 ? '' : scoreClass(g.score);
+                const rankClass = i === 0 ? 'leader' : '';
+                const rankCircle = i === 0 ? '' : i === 1 ? ' second' : i === 2 ? ' third' : '';
 
-            // Sort for team (combined score, ineligible at bottom)
+                return `<div class="standing-card ${rankClass}">
+                    <div class="card-rank${rankCircle}">${i + 1}</div>
+                    <div class="card-body">
+                        <div class="card-owner">${entry.owner}</div>
+                        <div class="card-golfers">
+                            ${entry.golfers.map(gl => golferTagHTML(gl, gl.pickName === g.pickName)).join('')}
+                        </div>
+                        ${g.thru ? `<div class="card-thru">${g.thru}</div>` : ''}
+                    </div>
+                    <div class="card-score">
+                        <div class="score-value ${sClass}">${scoreText}</div>
+                        <div class="score-label">Best</div>
+                    </div>
+                </div>`;
+            }).join('');
+
+            // Team view
             const teamSorted = [...poolResults].sort((a, b) => {
                 if (a.teamEligible && !b.teamEligible) return -1;
                 if (!a.teamEligible && b.teamEligible) return 1;
@@ -578,53 +730,27 @@
                 return a.teamScore - b.teamScore;
             });
 
-            // Render individual
-            const indBody = document.getElementById('individualBody');
-            indBody.innerHTML = individualSorted.map((entry, i) => {
-                const g = entry.bestGolfer;
-                const scoreText = g.score === 999 ? '-' : formatScore(g.score);
-                const sClass = g.score === 999 ? '' : scoreClass(g.score);
-                return `<tr>
-                    <td class="rank ${i === 0 ? 'first' : ''}">${i + 1}</td>
-                    <td class="person-name">${entry.owner}</td>
-                    <td>
-                        <span>${g.pickName}</span>
-                        ${g.status === 'CUT' ? '<span class="golfer-status status-cut">CUT</span>' : ''}
-                        ${g.status === 'WD' ? '<span class="golfer-status status-wd">WD</span>' : ''}
-                        <div class="golfer-scores">
-                            ${entry.golfers.filter(x => x.pickName !== g.pickName).map(x =>
-                                `<span class="golfer-score">${x.pickName}: ${x.score === 999 ? '-' : formatScore(x.score)}
-                                ${x.status === 'CUT' ? '<span class="golfer-status status-cut">CUT</span>' : ''}
-                                ${x.status === 'WD' ? '<span class="golfer-status status-wd">WD</span>' : ''}
-                                </span>`
-                            ).join('')}
-                        </div>
-                    </td>
-                    <td class="thru">${g.thru || '-'}</td>
-                    <td class="score-cell score ${sClass}">${scoreText}</td>
-                </tr>`;
-            }).join('');
-
-            // Render team
-            const teamBody = document.getElementById('teamBody');
-            teamBody.innerHTML = teamSorted.map((entry, i) => {
+            const teamView = document.getElementById('teamView');
+            teamView.innerHTML = teamSorted.map((entry, i) => {
                 const scoreText = entry.teamEligible ? formatScore(entry.teamScore) : '-';
                 const sClass = entry.teamEligible ? scoreClass(entry.teamScore) : '';
-                return `<tr>
-                    <td class="rank ${i === 0 && entry.teamEligible ? 'first' : ''}">${entry.teamEligible ? i + 1 : '-'}</td>
-                    <td class="person-name">${entry.owner}</td>
-                    <td>
-                        ${entry.golfers.map(g => `
-                            <span class="golfer-score">
-                                ${g.pickName}: ${g.score === 999 ? '-' : formatScore(g.score)}
-                                ${g.status === 'CUT' ? '<span class="golfer-status status-cut">CUT</span>' : ''}
-                                ${g.status === 'WD' ? '<span class="golfer-status status-wd">WD</span>' : ''}
-                            </span>
-                        `).join('')}
-                        ${!entry.teamEligible ? '<div class="team-ineligible">Ineligible (missed cut/WD)</div>' : ''}
-                    </td>
-                    <td class="score-cell score ${sClass}">${scoreText}</td>
-                </tr>`;
+                const isLeader = i === 0 && entry.teamEligible;
+                const rankCircle = isLeader ? '' : i === 1 && entry.teamEligible ? ' second' : i === 2 && entry.teamEligible ? ' third' : '';
+
+                return `<div class="standing-card ${isLeader ? 'leader' : ''} ${!entry.teamEligible ? 'ineligible' : ''}">
+                    <div class="card-rank${rankCircle}">${entry.teamEligible ? i + 1 : '-'}</div>
+                    <div class="card-body">
+                        <div class="card-owner">${entry.owner}</div>
+                        <div class="card-golfers">
+                            ${entry.golfers.map(g => golferTagHTML(g, false)).join('')}
+                        </div>
+                        ${!entry.teamEligible ? '<div class="ineligible-note">Ineligible &mdash; missed cut / WD</div>' : ''}
+                    </div>
+                    <div class="card-score">
+                        <div class="score-value ${sClass}">${scoreText}</div>
+                        <div class="score-label">Combined</div>
+                    </div>
+                </div>`;
             }).join('');
         }
 
@@ -652,21 +778,16 @@
                     loadingEl.classList.add('hidden');
                     errorEl.classList.remove('hidden');
                     errorEl.innerHTML = `
-                        <p>Unable to fetch leaderboard data.</p>
-                        <p style="font-size:0.85rem; color:#8fbc8f; margin-top:8px;">
-                            The tournament may not have started yet, or ESPN's API may be temporarily unavailable.<br>
-                            The page will keep trying every 60 seconds.
-                        </p>`;
+                        <p><strong>Unable to fetch leaderboard data.</strong></p>
+                        <p>The tournament may not have started yet, or ESPN's API may be temporarily unavailable.</p>
+                        <p style="margin-top:8px;font-size:0.75rem;">The page will keep trying every 60 seconds.</p>`;
                 }
                 statusBar.className = 'status-bar error';
                 statusText.textContent = `Connection issue \u2022 Retrying in 60s...`;
             }
         }
 
-        // Initial load
         update();
-
-        // Auto-refresh every 60 seconds
         setInterval(update, 60000);
     </script>
 </body>
