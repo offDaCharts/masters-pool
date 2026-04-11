@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Westchester Round Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --green: #1f4d3a;
+      --green-dark: #163729;
+      --green-deep: #10271d;
+      --sand: #f6f1e7;
+      --sand-dark: #e7dcc8;
+      --gold: #d8b36a;
+      --gold-dark: #b58d42;
+      --rose: #b75d69;
+      --ink: #1b2b22;
+      --muted: #607565;
+      --card: #ffffff;
+      --line: rgba(0,0,0,0.08);
+      --shadow: 0 8px 24px rgba(0,0,0,0.08);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, sans-serif;
+      background: var(--sand);
+      color: var(--ink);
+    }
+    .header {
+      background: linear-gradient(180deg, var(--green) 0%, var(--green-dark) 100%);
+      color: white;
+      text-align: center;
+      padding: 38px 20px 28px;
+      position: relative;
+      overflow: hidden;
+    }
+    .header::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(255,255,255,0.08), transparent 30%),
+        radial-gradient(circle at 80% 10%, rgba(216,179,106,0.14), transparent 25%),
+        radial-gradient(circle at 50% 100%, rgba(0,0,0,0.16), transparent 40%);
+      pointer-events: none;
+    }
+    .header-inner { position: relative; z-index: 1; }
+    .badge {
+      display: inline-block;
+      padding: 6px 12px;
+      border: 1px solid rgba(255,255,255,0.22);
+      border-radius: 999px;
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.78);
+      margin-bottom: 14px;
+    }
+    h1 {
+      margin: 0;
+      font-family: "Playfair Display", Georgia, serif;
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      color: #f4dfb0;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .subtitle {
+      margin-top: 12px;
+      color: rgba(255,255,255,0.72);
+      font-size: 0.95rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .info-bar {
+      background: var(--green-deep);
+      color: rgba(255,255,255,0.76);
+      display: flex;
+      justify-content: center;
+      gap: 28px;
+      flex-wrap: wrap;
+      padding: 14px 16px;
+      border-bottom: 3px solid var(--gold);
+      font-size: 0.9rem;
+    }
+    .info-bar strong { color: #f4dfb0; }
+    .container {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 24px 16px 48px;
+    }
+    .notice {
+      background: #fffaf0;
+      border: 1px solid #eddcaf;
+      color: #6b5831;
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 18px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+      font-size: 0.95rem;
+    }
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+    .toolbar-left {
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+    .actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    button {
+      appearance: none;
+      border: none;
+      background: var(--green);
+      color: white;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(31,77,58,0.18);
+    }
+    button.secondary {
+      background: white;
+      color: var(--green);
+      border: 1px solid rgba(31,77,58,0.18);
+      box-shadow: none;
+    }
+    .leaderboard {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 16px 18px;
+      display: grid;
+      grid-template-columns: 48px 1fr auto auto;
+      gap: 16px;
+      align-items: center;
+      box-shadow: var(--shadow);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      cursor: pointer;
+    }
+    .card:hover { transform: translateY(-1px); }
+    .rank {
+      width: 40px;
+      height: 40px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      background: #f1f3ef;
+      color: var(--green);
+    }
+    .card.leader .rank {
+      background: linear-gradient(135deg, #f4dfb0, var(--gold-dark));
+      color: var(--green-deep);
+    }
+    .player-name {
+      font-size: 1.12rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .meta {
+      color: var(--muted);
+      font-size: 0.9rem;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .score-block { text-align: right; }
+    .score-value {
+      font-size: 1.7rem;
+      font-weight: 800;
+      line-height: 1;
+      color: var(--green);
+    }
+    .score-value.over { color: #315f96; }
+    .score-value.under { color: var(--rose); }
+    .score-label {
+      margin-top: 5px;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+    .holes-chip {
+      min-width: 74px;
+      text-align: center;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: #f4f6f2;
+      color: var(--green);
+      font-weight: 700;
+    }
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(16,39,29,0.45);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 10;
+    }
+    .overlay.open { display: flex; }
+    .modal {
+      width: min(860px, 100%);
+      max-height: 92vh;
+      overflow: auto;
+      background: white;
+      border-radius: 18px;
+      box-shadow: 0 22px 60px rgba(0,0,0,0.24);
+    }
+    .modal-header {
+      position: sticky;
+      top: 0;
+      background: white;
+      padding: 18px 18px 14px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: start;
+      z-index: 1;
+    }
+    .modal h2 {
+      margin: 0 0 4px;
+      font-family: "Playfair Display", Georgia, serif;
+      color: var(--green);
+    }
+    .modal-sub { color: var(--muted); font-size: 0.92rem; }
+    .close-btn {
+      background: transparent;
+      color: var(--muted);
+      box-shadow: none;
+      padding: 6px 10px;
+      font-size: 1.3rem;
+      line-height: 1;
+    }
+    .grid {
+      padding: 18px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    .hole-card {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+      background: #fcfcfb;
+    }
+    .hole-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .hole-num { font-weight: 700; color: var(--green); }
+    .hole-par {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+    input[type="number"] {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #d9e0d8;
+      font-size: 1rem;
+      font-weight: 600;
+    }
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      padding: 0 18px 18px;
+    }
+    .summary-card {
+      background: #f5f7f3;
+      border-radius: 12px;
+      padding: 14px;
+    }
+    .summary-card .label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .summary-card .value {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--green);
+    }
+    .modal-actions {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 0 18px 18px;
+      flex-wrap: wrap;
+    }
+    .footer-note {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.85rem;
+      margin-top: 18px;
+    }
+    @media (max-width: 720px) {
+      .card { grid-template-columns: 40px 1fr; }
+      .score-block, .holes-chip { text-align: left; }
+      .grid { grid-template-columns: repeat(2, 1fr); }
+      .summary { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 520px) {
+      .grid, .summary { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <div class="badge">Private Round Tracker</div>
+      <h1>Westchester</h1>
+      <div class="subtitle">Round leaderboard • 18 holes • Par 64</div>
+    </div>
+  </header>
+
+  <div class="info-bar">
+    <div><strong>Course:</strong> Westchester Golf Course</div>
+    <div><strong>Players:</strong> 8</div>
+    <div><strong>Pars:</strong> 3 4 3 3 4 4 4 3 4 4 3 3 3 3 5 3 4 4</div>
+  </div>
+
+  <main class="container">
+    <div class="notice">
+      Scores are saved in this browser with localStorage. For a lightweight private round board, that keeps hosting simple on GitHub Pages, but edits are not synced across devices automatically.
+    </div>
+
+    <div class="toolbar">
+      <div class="toolbar-left">Tap a player to enter scores hole-by-hole.</div>
+      <div class="actions">
+        <button class="secondary" id="seedBtn">Reset to blank round</button>
+        <button class="secondary" id="exportBtn">Export scores</button>
+      </div>
+    </div>
+
+    <section id="leaderboard" class="leaderboard"></section>
+    <div class="footer-note">Hosted as a static site on GitHub Pages.</div>
+  </main>
+
+  <div class="overlay" id="overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <div>
+          <h2 id="modalTitle">Player</h2>
+          <div class="modal-sub" id="modalSub">Enter scores by hole</div>
+        </div>
+        <button class="close-btn" id="closeBtn">×</button>
+      </div>
+      <div class="summary" id="summary"></div>
+      <div class="grid" id="holeGrid"></div>
+      <div class="modal-actions">
+        <button class="secondary" id="clearPlayerBtn">Clear player scores</button>
+        <button id="doneBtn">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const PARS = '343344434433335344'.split('').map(Number);
+    const PLAYERS = ['Quin', 'Kasey', 'Marco', 'Conor', 'Pete', 'Luke', 'Greg', 'Dobon'];
+    const STORAGE_KEY = 'westchester-round-scores-v1';
+
+    let state = loadState();
+    let activePlayer = null;
+
+    function emptyScores() {
+      return Array(18).fill('');
+    }
+
+    function loadState() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        try {
+          const parsed = JSON.parse(raw);
+          PLAYERS.forEach(name => {
+            if (!Array.isArray(parsed[name])) parsed[name] = emptyScores();
+            parsed[name] = parsed[name].slice(0, 18);
+            while (parsed[name].length < 18) parsed[name].push('');
+          });
+          return parsed;
+        } catch {}
+      }
+      const fresh = {};
+      PLAYERS.forEach(name => fresh[name] = emptyScores());
+      return fresh;
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function totalParThrough(scores) {
+      return scores.reduce((sum, value, idx) => value === '' ? sum : sum + PARS[idx], 0);
+    }
+
+    function totalScore(scores) {
+      return scores.reduce((sum, value) => value === '' ? sum : sum + Number(value), 0);
+    }
+
+    function holesPlayed(scores) {
+      return scores.filter(v => v !== '').length;
+    }
+
+    function relToPar(scores) {
+      const played = holesPlayed(scores);
+      if (!played) return null;
+      return totalScore(scores) - totalParThrough(scores);
+    }
+
+    function scoreText(rel) {
+      if (rel === null) return '—';
+      if (rel === 0) return 'E';
+      return rel > 0 ? `+${rel}` : `${rel}`;
+    }
+
+    function scoreClass(rel) {
+      if (rel === null || rel === 0) return '';
+      return rel > 0 ? 'over' : 'under';
+    }
+
+    function sortedPlayers() {
+      return [...PLAYERS].sort((a, b) => {
+        const aRel = relToPar(state[a]);
+        const bRel = relToPar(state[b]);
+        if (aRel === null && bRel === null) return a.localeCompare(b);
+        if (aRel === null) return 1;
+        if (bRel === null) return -1;
+        if (aRel !== bRel) return aRel - bRel;
+        const aTotal = totalScore(state[a]);
+        const bTotal = totalScore(state[b]);
+        if (aTotal !== bTotal) return aTotal - bTotal;
+        return holesPlayed(state[b]) - holesPlayed(state[a]);
+      });
+    }
+
+    function renderLeaderboard() {
+      const board = document.getElementById('leaderboard');
+      const players = sortedPlayers();
+      board.innerHTML = players.map((name, index) => {
+        const scores = state[name];
+        const rel = relToPar(scores);
+        const total = totalScore(scores);
+        const played = holesPlayed(scores);
+        const thru = played ? `${played}/18` : 'Not started';
+        return `
+          <div class="card ${index === 0 && rel !== null ? 'leader' : ''}" data-player="${name}">
+            <div class="rank">${rel === null ? '—' : index + 1}</div>
+            <div>
+              <div class="player-name">${name}</div>
+              <div class="meta">
+                <span>Total ${played ? total : '—'}</span>
+                <span>${thru}</span>
+                <span>Click to edit</span>
+              </div>
+            </div>
+            <div class="score-block">
+              <div class="score-value ${scoreClass(rel)}">${scoreText(rel)}</div>
+              <div class="score-label">to par</div>
+            </div>
+            <div class="holes-chip">${played} holes</div>
+          </div>
+        `;
+      }).join('');
+
+      board.querySelectorAll('.card').forEach(card => {
+        card.addEventListener('click', () => openPlayer(card.dataset.player));
+      });
+    }
+
+    function renderModal(player) {
+      activePlayer = player;
+      const scores = state[player];
+      document.getElementById('modalTitle').textContent = player;
+      document.getElementById('modalSub').textContent = `Westchester • Par 64 • ${holesPlayed(scores)} holes entered`;
+
+      const rel = relToPar(scores);
+      const total = totalScore(scores);
+      const played = holesPlayed(scores);
+      const parThrough = totalParThrough(scores);
+
+      document.getElementById('summary').innerHTML = [
+        ['Total', played ? total : '—'],
+        ['To Par', scoreText(rel)],
+        ['Holes', `${played}/18`],
+        ['Par Through', played ? parThrough : '—'],
+      ].map(([label, value]) => `
+        <div class="summary-card">
+          <div class="label">${label}</div>
+          <div class="value ${label === 'To Par' ? scoreClass(rel) : ''}">${value}</div>
+        </div>
+      `).join('');
+
+      document.getElementById('holeGrid').innerHTML = PARS.map((par, idx) => `
+        <div class="hole-card">
+          <div class="hole-top">
+            <div class="hole-num">Hole ${idx + 1}</div>
+            <div class="hole-par">Par ${par}</div>
+          </div>
+          <input type="number" min="1" max="12" step="1" value="${scores[idx]}" data-hole="${idx}" placeholder="Score" />
+        </div>
+      `).join('');
+
+      document.querySelectorAll('#holeGrid input').forEach(input => {
+        input.addEventListener('input', (e) => {
+          const hole = Number(e.target.dataset.hole);
+          const value = e.target.value;
+          state[player][hole] = value === '' ? '' : Math.max(1, Number(value));
+          saveState();
+          renderModal(player);
+          renderLeaderboard();
+        });
+      });
+    }
+
+    function openPlayer(player) {
+      renderModal(player);
+      document.getElementById('overlay').classList.add('open');
+    }
+
+    function closeModal() {
+      document.getElementById('overlay').classList.remove('open');
+      activePlayer = null;
+    }
+
+    document.getElementById('closeBtn').addEventListener('click', closeModal);
+    document.getElementById('doneBtn').addEventListener('click', closeModal);
+    document.getElementById('overlay').addEventListener('click', (e) => {
+      if (e.target.id === 'overlay') closeModal();
+    });
+
+    document.getElementById('clearPlayerBtn').addEventListener('click', () => {
+      if (!activePlayer) return;
+      state[activePlayer] = emptyScores();
+      saveState();
+      renderModal(activePlayer);
+      renderLeaderboard();
+    });
+
+    document.getElementById('seedBtn').addEventListener('click', () => {
+      if (!confirm('Clear all player scores and start fresh?')) return;
+      PLAYERS.forEach(name => state[name] = emptyScores());
+      saveState();
+      closeModal();
+      renderLeaderboard();
+    });
+
+    document.getElementById('exportBtn').addEventListener('click', async () => {
+      const payload = JSON.stringify(state, null, 2);
+      try {
+        await navigator.clipboard.writeText(payload);
+        alert('Scores JSON copied to clipboard.');
+      } catch {
+        alert(payload);
+      }
+    });
+
+    renderLeaderboard();
+  </script>
+</body>
+</html>
