@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "api/round.js": {
+      "runtime": "nodejs24.x"
+    }
+  }
+}

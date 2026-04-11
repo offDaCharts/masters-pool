@@ -343,7 +343,7 @@
 
   <main class="container">
     <div class="notice">
-      Scores are saved in this browser with localStorage. For a lightweight private round board, that keeps hosting simple on GitHub Pages, but edits are not synced across devices automatically.
+      Scores sync across browsers through a tiny Vercel-backed shared round state. Local cache remains as a fallback, but cloud state is the source of truth.
     </div>
 
     <div class="toolbar">
@@ -380,9 +380,11 @@
     const PARS = '343344434433335344'.split('').map(Number);
     const PLAYERS = ['Quin', 'Kasey', 'Marco', 'Conor', 'Pete', 'Luke', 'Greg', 'Dobon'];
     const STORAGE_KEY = 'westchester-round-scores-v1';
+    const API_URL = 'https://westchester-round-sync.vercel.app/api/round';
 
     let state = loadState();
     let activePlayer = null;
+    let syncing = false;
 
     function emptyScores() {
       return Array(18).fill('');
@@ -408,6 +410,38 @@
 
     function saveState() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    async function pushState() {
+      if (syncing) return;
+      syncing = true;
+      try {
+        await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(state)
+        });
+      } catch (err) {
+        console.error('Push failed', err);
+      } finally {
+        syncing = false;
+      }
+    }
+
+    async function pullState() {
+      try {
+        const resp = await fetch(API_URL, { cache: 'no-store' });
+        if (!resp.ok) throw new Error('Failed to load shared state');
+        const remote = await resp.json();
+        state = remote;
+        saveState();
+        renderLeaderboard();
+    pullState();
+    setInterval(pullState, 5000);
+        if (activePlayer) renderModal(activePlayer);
+      } catch (err) {
+        console.error('Pull failed', err);
+      }
     }
 
     function totalParThrough(scores) {
@@ -527,8 +561,11 @@
           const value = e.target.value;
           state[player][hole] = value === '' ? '' : Math.max(1, Number(value));
           saveState();
+          pushState();
           renderModal(player);
           renderLeaderboard();
+    pullState();
+    setInterval(pullState, 5000);
         });
       });
     }
@@ -553,16 +590,22 @@
       if (!activePlayer) return;
       state[activePlayer] = emptyScores();
       saveState();
+      pushState();
       renderModal(activePlayer);
       renderLeaderboard();
+    pullState();
+    setInterval(pullState, 5000);
     });
 
     document.getElementById('seedBtn').addEventListener('click', () => {
       if (!confirm('Clear all player scores and start fresh?')) return;
       PLAYERS.forEach(name => state[name] = emptyScores());
       saveState();
+      pushState();
       closeModal();
       renderLeaderboard();
+    pullState();
+    setInterval(pullState, 5000);
     });
 
     document.getElementById('exportBtn').addEventListener('click', async () => {
@@ -576,6 +619,8 @@
     });
 
     renderLeaderboard();
+    pullState();
+    setInterval(pullState, 5000);
   </script>
 </body>
 </html>
