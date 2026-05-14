@@ -3,22 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Masters Pool 2026</title>
+    <title>PGA Championship Pool 2026</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --augusta-green: #006747;
-            --augusta-dark: #004d35;
-            --augusta-deep: #003323;
-            --masters-yellow: #f2c75c;
-            --masters-gold: #d4a843;
-            --cream: #fdf8ef;
-            --cream-dark: #f0e6d3;
-            --azalea: #cf5c78;
-            --text-dark: #1a2e1a;
-            --text-muted: #5a7a5a;
+            --pga-navy: #0a2540;
+            --pga-navy-dark: #061a30;
+            --pga-navy-deep: #03101f;
+            --pga-gold: #d4af37;
+            --pga-gold-bright: #f0c75e;
+            --pga-gold-deep: #a8842b;
+            --cream: #f7f3ec;
+            --cream-dark: #ebe2d0;
+            --crimson: #b22234;
+            --text-dark: #14233a;
+            --text-muted: #5a6a82;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -32,7 +33,7 @@
 
         /* === HEADER === */
         .header {
-            background: var(--augusta-green);
+            background: var(--pga-navy);
             position: relative;
             overflow: hidden;
             padding: 40px 20px 32px;
@@ -44,59 +45,98 @@
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
             background:
-                radial-gradient(ellipse at 20% 80%, rgba(0,80,50,0.6) 0%, transparent 60%),
-                radial-gradient(ellipse at 80% 20%, rgba(0,100,60,0.4) 0%, transparent 60%),
-                linear-gradient(180deg, rgba(0,0,0,0.15) 0%, transparent 40%, rgba(0,0,0,0.1) 100%);
+                radial-gradient(ellipse at 20% 80%, rgba(20,50,90,0.6) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 20%, rgba(212,175,55,0.12) 0%, transparent 55%),
+                linear-gradient(180deg, rgba(0,0,0,0.2) 0%, transparent 40%, rgba(0,0,0,0.15) 100%);
         }
 
         .header-content { position: relative; z-index: 1; }
 
-        .header-flag {
+        /* Wanamaker trophy SVG-ish glyph */
+        .trophy {
             display: inline-block;
-            margin-bottom: 12px;
-        }
-
-        .flag-pole {
-            display: inline-block;
-            width: 2px;
-            height: 40px;
-            background: linear-gradient(to bottom, #ddd, #999);
-            vertical-align: bottom;
-            margin-right: -2px;
-        }
-
-        .flag-icon {
-            display: inline-block;
-            width: 28px;
-            height: 20px;
-            background: var(--masters-yellow);
-            border-radius: 0 3px 3px 0;
-            vertical-align: top;
+            width: 44px;
+            height: 56px;
+            margin-bottom: 8px;
             position: relative;
-            box-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+        }
+
+        .trophy-cup {
+            position: absolute;
+            top: 4px; left: 50%;
+            transform: translateX(-50%);
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, var(--pga-gold-bright), var(--pga-gold-deep));
+            border-radius: 50% 50% 45% 45% / 60% 60% 40% 40%;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.4), inset 0 -3px 6px rgba(0,0,0,0.25), inset 0 2px 4px rgba(255,255,255,0.3);
+        }
+
+        .trophy-handle-l, .trophy-handle-r {
+            position: absolute;
+            top: 8px;
+            width: 8px;
+            height: 16px;
+            border: 2px solid var(--pga-gold);
+            border-radius: 50%;
+        }
+
+        .trophy-handle-l { left: 4px; border-right: none; }
+        .trophy-handle-r { right: 4px; border-left: none; }
+
+        .trophy-stem {
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 6px;
+            height: 14px;
+            background: linear-gradient(180deg, var(--pga-gold-deep), var(--pga-gold));
+        }
+
+        .trophy-base {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 22px;
+            height: 6px;
+            background: linear-gradient(180deg, var(--pga-gold), var(--pga-gold-deep));
+            border-radius: 2px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.4);
         }
 
         .header h1 {
             font-family: 'Playfair Display', Georgia, serif;
-            font-size: 2.6rem;
+            font-size: 2.4rem;
             font-weight: 700;
-            color: var(--masters-yellow);
+            color: var(--pga-gold-bright);
             letter-spacing: 4px;
             text-transform: uppercase;
-            text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+            line-height: 1.1;
+        }
+
+        .header h1 .small {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 400;
+            letter-spacing: 6px;
+            color: rgba(240,199,94,0.85);
+            margin-top: 4px;
         }
 
         .header .divider {
             width: 60px;
             height: 2px;
-            background: var(--masters-yellow);
-            margin: 12px auto;
-            opacity: 0.6;
+            background: var(--pga-gold);
+            margin: 14px auto;
+            opacity: 0.7;
         }
 
         .header .subtitle {
             font-family: 'Inter', sans-serif;
-            color: rgba(255,255,255,0.7);
+            color: rgba(255,255,255,0.75);
             font-size: 0.85rem;
             font-weight: 300;
             letter-spacing: 3px;
@@ -104,8 +144,8 @@
         }
 
         .prizes-bar {
-            background: var(--augusta-dark);
-            border-bottom: 3px solid var(--masters-yellow);
+            background: var(--pga-navy-dark);
+            border-bottom: 3px solid var(--pga-gold);
             padding: 14px 20px;
             display: flex;
             justify-content: center;
@@ -131,14 +171,14 @@
         }
 
         .prize-icon.gold {
-            background: linear-gradient(135deg, var(--masters-yellow), var(--masters-gold));
-            color: var(--augusta-deep);
+            background: linear-gradient(135deg, var(--pga-gold-bright), var(--pga-gold-deep));
+            color: var(--pga-navy-deep);
             font-weight: 700;
         }
 
         .prize-icon.silver {
-            background: linear-gradient(135deg, #c0c0c0, #a0a0a0);
-            color: #333;
+            background: linear-gradient(135deg, #d8d8d8, #a8a8a8);
+            color: #222;
             font-weight: 700;
         }
 
@@ -147,13 +187,13 @@
         }
 
         .prize-amount {
-            color: var(--masters-yellow);
+            color: var(--pga-gold-bright);
             font-weight: 700;
             font-size: 1.05rem;
         }
 
         .prize-label {
-            color: rgba(255,255,255,0.5);
+            color: rgba(255,255,255,0.55);
             font-size: 0.7rem;
             text-transform: uppercase;
             letter-spacing: 1px;
@@ -161,11 +201,11 @@
 
         /* === STATUS BAR === */
         .status-bar {
-            background: var(--augusta-deep);
+            background: var(--pga-navy-deep);
             padding: 8px 16px;
             text-align: center;
             font-size: 0.75rem;
-            color: rgba(255,255,255,0.5);
+            color: rgba(255,255,255,0.55);
             letter-spacing: 0.5px;
         }
 
@@ -183,8 +223,8 @@
             animation: pulse 2s ease-in-out infinite;
         }
 
-        .status-bar.error .live-dot { background: var(--azalea); animation: none; }
-        .status-bar.loading .live-dot { background: var(--masters-yellow); }
+        .status-bar.error .live-dot { background: var(--crimson); animation: none; }
+        .status-bar.loading .live-dot { background: var(--pga-gold-bright); }
 
         @keyframes pulse {
             0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(76,175,80,0.4); }
@@ -204,7 +244,7 @@
             justify-content: center;
             gap: 0;
             margin: 0 0 20px;
-            border-bottom: 2px solid #ddd;
+            border-bottom: 2px solid #d6d6d6;
         }
 
         .tab {
@@ -220,11 +260,11 @@
             transition: all 0.25s ease;
         }
 
-        .tab:hover { color: var(--augusta-green); }
+        .tab:hover { color: var(--pga-navy); }
 
         .tab.active {
-            color: var(--augusta-green);
-            border-bottom-color: var(--augusta-green);
+            color: var(--pga-navy);
+            border-bottom-color: var(--pga-gold);
             font-weight: 600;
         }
 
@@ -262,9 +302,9 @@
         }
 
         .standing-card.leader {
-            border: 2px solid var(--masters-yellow);
-            background: linear-gradient(135deg, #fffdf5 0%, #fff9e6 100%);
-            box-shadow: 0 2px 8px rgba(212,168,67,0.15), 0 1px 3px rgba(0,0,0,0.06);
+            border: 2px solid var(--pga-gold);
+            background: linear-gradient(135deg, #fffdf3 0%, #fff6dc 100%);
+            box-shadow: 0 2px 10px rgba(212,175,55,0.2), 0 1px 3px rgba(0,0,0,0.06);
         }
 
         .standing-card.ineligible {
@@ -280,18 +320,18 @@
             justify-content: center;
             font-weight: 700;
             font-size: 0.9rem;
-            background: #f5f5f5;
+            background: #eef1f6;
             color: var(--text-muted);
         }
 
         .leader .card-rank {
-            background: linear-gradient(135deg, var(--masters-yellow), var(--masters-gold));
-            color: var(--augusta-deep);
+            background: linear-gradient(135deg, var(--pga-gold-bright), var(--pga-gold-deep));
+            color: var(--pga-navy-deep);
             font-size: 1rem;
-            box-shadow: 0 2px 6px rgba(212,168,67,0.3);
+            box-shadow: 0 2px 6px rgba(212,175,55,0.35);
         }
 
-        .card-rank.second { background: #e8e8e8; color: #555; }
+        .card-rank.second { background: #e2e6ee; color: #444; }
         .card-rank.third { background: #f0e0d0; color: #8b6914; }
 
         .card-body { min-width: 0; }
@@ -321,7 +361,7 @@
         .golfer-name { font-weight: 500; }
 
         .golfer-name.best {
-            color: var(--augusta-green);
+            color: var(--pga-navy);
             font-weight: 600;
         }
 
@@ -330,12 +370,12 @@
             font-size: 0.75rem;
             padding: 1px 6px;
             border-radius: 4px;
-            background: #f0f5f0;
+            background: #eef1f6;
         }
 
-        .golfer-tag-score.under-par { color: var(--azalea); background: #fdf0f3; }
-        .golfer-tag-score.over-par { color: #4a7ab5; background: #f0f4fa; }
-        .golfer-tag-score.even-par { color: #666; background: #f5f5f5; }
+        .golfer-tag-score.under-par { color: var(--crimson); background: #fdeff1; }
+        .golfer-tag-score.over-par { color: #2c4d80; background: #eaf0f8; }
+        .golfer-tag-score.even-par { color: #555; background: #eef1f6; }
 
         .golfer-badge {
             font-size: 0.6rem;
@@ -346,7 +386,7 @@
             text-transform: uppercase;
         }
 
-        .badge-cut { color: #fff; background: var(--azalea); }
+        .badge-cut { color: #fff; background: var(--crimson); }
         .badge-wd { color: #fff; background: #e6a23c; }
 
         .card-thru {
@@ -358,7 +398,7 @@
 
         .ineligible-note {
             font-size: 0.7rem;
-            color: var(--azalea);
+            color: var(--crimson);
             margin-top: 2px;
             font-weight: 500;
         }
@@ -375,8 +415,8 @@
             line-height: 1;
         }
 
-        .score-value.under-par { color: var(--azalea); }
-        .score-value.over-par { color: #4a7ab5; }
+        .score-value.under-par { color: var(--crimson); }
+        .score-value.over-par { color: #2c4d80; }
         .score-value.even-par { color: var(--text-dark); }
 
         .score-label {
@@ -397,7 +437,7 @@
             width: 40px;
             height: 40px;
             border: 3px solid var(--cream-dark);
-            border-top-color: var(--augusta-green);
+            border-top-color: var(--pga-navy);
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
             margin: 0 auto 16px;
@@ -421,56 +461,30 @@
 
         .hidden { display: none !important; }
 
-        /* === CROSS-POOL BANNER === */
-        .pool-banner {
-            background: #0a2540;
-            border-bottom: 2px solid #d4af37;
-            padding: 10px 16px;
-            text-align: center;
-            font-size: 0.78rem;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-        }
-
-        .pool-banner a {
-            color: #f0c75e;
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        .pool-banner a:hover { text-decoration: underline; }
-
-        .pool-banner .arrow {
-            display: inline-block;
-            margin-left: 4px;
-            transition: transform 0.2s ease;
-        }
-
-        .pool-banner a:hover .arrow { transform: translateX(3px); }
-
         /* === FOOTER === */
         .footer {
             text-align: center;
             padding: 24px 16px;
             font-size: 0.7rem;
-            color: #bbb;
+            color: #aaa;
             letter-spacing: 0.5px;
         }
 
-        .footer .azalea {
+        .footer .accent {
             display: inline-block;
             width: 8px;
             height: 8px;
-            background: var(--azalea);
+            background: var(--pga-gold);
             border-radius: 50%;
             margin: 0 4px;
-            opacity: 0.5;
+            opacity: 0.6;
         }
 
         /* === RESPONSIVE === */
         @media (max-width: 600px) {
             .header { padding: 28px 16px 24px; }
-            .header h1 { font-size: 1.8rem; letter-spacing: 2px; }
+            .header h1 { font-size: 1.6rem; letter-spacing: 2px; }
+            .header h1 .small { font-size: 0.7rem; letter-spacing: 4px; }
             .prizes-bar { gap: 20px; padding: 12px 16px; }
             .tab { padding: 10px 16px; font-size: 0.75rem; }
             .standing-card { padding: 12px 14px; gap: 10px; }
@@ -485,12 +499,16 @@
 
     <div class="header">
         <div class="header-content">
-            <div class="header-flag">
-                <span class="flag-pole"></span><span class="flag-icon"></span>
+            <div class="trophy">
+                <span class="trophy-handle-l"></span>
+                <span class="trophy-handle-r"></span>
+                <span class="trophy-cup"></span>
+                <span class="trophy-stem"></span>
+                <span class="trophy-base"></span>
             </div>
-            <h1>The Masters Pool</h1>
+            <h1>PGA Championship<span class="small">Pool &mdash; 2026</span></h1>
             <div class="divider"></div>
-            <div class="subtitle">Augusta National &bull; April 2026 &bull; $25 Buy-In</div>
+            <div class="subtitle">Aronimink Golf Club &bull; May 2026 &bull; $25 Buy-In</div>
         </div>
     </div>
 
@@ -498,21 +516,17 @@
         <div class="prize-item">
             <div class="prize-icon gold">1st</div>
             <div class="prize-info">
-                <div class="prize-amount">$125</div>
+                <div class="prize-amount">$150</div>
                 <div class="prize-label">Best Individual Golfer</div>
             </div>
         </div>
         <div class="prize-item">
             <div class="prize-icon silver">2nd</div>
             <div class="prize-info">
-                <div class="prize-amount">$75</div>
+                <div class="prize-amount">$100</div>
                 <div class="prize-label">Best Team Score</div>
             </div>
         </div>
-    </div>
-
-    <div class="pool-banner">
-        <a href="pga.html">PGA Championship Pool 2026 is live <span class="arrow">&rarr;</span></a>
     </div>
 
     <div class="status-bar loading" id="statusBar">
@@ -524,15 +538,15 @@
 
     <div class="container">
         <div class="tab-bar">
-            <div class="tab active" data-tab="individual" onclick="switchTab('individual')">Best Golfer &mdash; $125</div>
-            <div class="tab" data-tab="team" onclick="switchTab('team')">Team Score &mdash; $75</div>
+            <div class="tab active" data-tab="individual" onclick="switchTab('individual')">Best Golfer &mdash; $150</div>
+            <div class="tab" data-tab="team" onclick="switchTab('team')">Team Score &mdash; $100</div>
         </div>
 
         <div id="roundInfo" class="round-info"></div>
 
         <div id="loading" class="loading-state">
             <div class="loading-spinner"></div>
-            <div class="loading-text">Fetching live scores from Augusta...</div>
+            <div class="loading-text">Fetching live scores from Aronimink...</div>
         </div>
 
         <div id="error" class="error-state hidden"></div>
@@ -542,38 +556,44 @@
     </div>
 
     <div class="footer">
-        A tradition unlike any other <span class="azalea"></span> Auto-updates every 60s
+        Glory's last shot <span class="accent"></span> Auto-updates every 60s
     </div>
 
     <script>
         const POOL = [
-            { owner: "Kasey",  picks: ["Scottie Scheffler", "Min Woo Lee"] },
-            { owner: "Luke",   picks: ["Bryson DeChambeau", "Brooks Koepka"] },
-            { owner: "Conor",  picks: ["Jon Rahm", "Robert MacIntyre"] },
-            { owner: "Dobon",  picks: ["Rory McIlroy", "Corey Conners"] },
-            { owner: "Brian",  picks: ["Cameron Young", "Matt Fitzpatrick"] },
-            { owner: "Tim",    picks: ["Justin Rose", "Patrick Reed"] },
-            { owner: "Robbie", picks: ["Xander Schauffele", "Ludvig Åberg"] },
-            { owner: "Anton",  picks: ["Tommy Fleetwood", "Collin Morikawa"] },
+            { owner: "Conor",  picks: ["Scottie Scheffler", "Russell Henley"] },
+            { owner: "Luke",   picks: ["Rory McIlroy", "Jordan Spieth"] },
+            { owner: "Tim",    picks: ["Cameron Young", "Alex Fitzpatrick"] },
+            { owner: "Dobon",  picks: ["Justin Rose", "Brooks Koepka"] },
+            { owner: "Anton",  picks: ["Matt Fitzpatrick", "Sahith Theegala"] },
+            { owner: "Quin",   picks: ["Jon Rahm", "Rickie Fowler"] },
+            { owner: "Robbie", picks: ["Bryson DeChambeau", "Chris Gotterup"] },
+            { owner: "Brian",  picks: ["Xander Schauffele", "J.J. Spaun"] },
+            { owner: "Davis",  picks: ["Ludvig Åberg", "Tommy Fleetwood"] },
+            { owner: "Kasey",  picks: ["Collin Morikawa", "Justin Thomas"] },
         ];
 
         const NAME_ALIASES = {
             "Scottie Scheffler": ["scheffler"],
-            "Min Woo Lee": ["min woo lee", "m.w. lee", "mw lee", "minwoo lee"],
-            "Bryson DeChambeau": ["dechambeau"],
-            "Brooks Koepka": ["koepka"],
-            "Jon Rahm": ["rahm"],
-            "Robert MacIntyre": ["macintyre", "bob macintyre"],
+            "Russell Henley": ["henley"],
             "Rory McIlroy": ["mcilroy"],
-            "Corey Conners": ["conners"],
+            "Jordan Spieth": ["spieth"],
             "Cameron Young": ["cam young", "cameron young"],
-            "Matt Fitzpatrick": ["fitzpatrick", "matthew fitzpatrick"],
+            "Alex Fitzpatrick": ["alex fitzpatrick", "a. fitzpatrick", "a fitzpatrick"],
             "Justin Rose": ["rose"],
-            "Patrick Reed": ["reed"],
+            "Brooks Koepka": ["koepka"],
+            "Matt Fitzpatrick": ["matt fitzpatrick", "matthew fitzpatrick", "m. fitzpatrick", "m fitzpatrick"],
+            "Sahith Theegala": ["theegala"],
+            "Jon Rahm": ["rahm"],
+            "Rickie Fowler": ["fowler"],
+            "Bryson DeChambeau": ["dechambeau"],
+            "Chris Gotterup": ["gotterup"],
             "Xander Schauffele": ["schauffele"],
+            "J.J. Spaun": ["spaun", "jj spaun", "j j spaun", "j.j. spaun"],
             "Ludvig Åberg": ["aberg", "ludvig aberg", "åberg"],
             "Tommy Fleetwood": ["fleetwood"],
             "Collin Morikawa": ["morikawa"],
+            "Justin Thomas": ["thomas", "justin thomas", "j. thomas", "jt"],
         };
 
         let currentTab = 'individual';
@@ -592,6 +612,14 @@
             const espnLower = espnName.toLowerCase().trim();
             const pickLower = pickName.toLowerCase().trim();
             if (espnLower === pickLower) return true;
+
+            // Special-case Fitzpatricks to avoid Matt matching Alex (and vice versa)
+            if (pickLower.includes('fitzpatrick')) {
+                const pickFirst = pickLower.split(' ')[0];
+                const espnFirst = espnLower.split(' ')[0];
+                return espnLower.includes('fitzpatrick') && espnFirst.startsWith(pickFirst[0]);
+            }
+
             if (espnLower.includes(pickLower) || pickLower.includes(espnLower)) return true;
             const aliases = NAME_ALIASES[pickName] || [];
             for (const alias of aliases) {
@@ -627,19 +655,19 @@
             const data = await resp.json();
 
             if (data.events && data.events.length > 0) {
-                let mastersEvent = data.events.find(e =>
-                    e.name && (e.name.toLowerCase().includes('masters') ||
-                    e.name.toLowerCase().includes('augusta'))
+                let pgaEvent = data.events.find(e =>
+                    e.name && (e.name.toLowerCase().includes('pga championship') ||
+                    e.name.toLowerCase().includes('aronimink'))
                 );
-                if (!mastersEvent) mastersEvent = data.events[0];
-                return parseESPNEvent(mastersEvent);
+                if (!pgaEvent) pgaEvent = data.events[0];
+                return parseESPNEvent(pgaEvent);
             }
             throw new Error('No event data');
         }
 
         function parseESPNEvent(event) {
             const golfers = [];
-            const eventName = event.name || 'The Masters';
+            const eventName = event.name || 'PGA Championship';
             let roundInfo = '';
             if (event.status) roundInfo = event.status;
 
