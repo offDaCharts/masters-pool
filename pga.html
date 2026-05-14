@@ -774,7 +774,7 @@
         const ODDS_LS_KEY = "pga_odds_v1";
         const ODDS_CLIENT_CACHE_MS = 14 * 60 * 1000;  // slightly under proxy's play-hours TTL
         const SIM_N = 10000;
-        const SIGMA_PER_ROUND = 3.0;
+        const SIGMA_PER_ROUND = 2.2;
         const FALLBACK_WIN_PROB = 0.002;
         const PRE_CUT_LINE = 3;  // projected cut line in strokes-to-par before R2 finishes
         let oddsState = { payload: null, ts: 0, error: null };
@@ -877,23 +877,24 @@
             return 0;
         }
 
-        // American-moneyline conversion with a typical 10% sportsbook overround.
+        // American-moneyline conversion with a typical sportsbook overround.
         // Adds juice so the implied probabilities sum to >100% (house edge).
-        const HOUSE_OVERROUND = 1.10;
+        // 25% overround is typical for outright/futures markets.
+        const HOUSE_OVERROUND = 1.25;
         function probToAmerican(p) {
             if (typeof p !== 'number' || !isFinite(p) || p <= 0) return null;
-            const padded = clamp(p * HOUSE_OVERROUND, 0.001, 0.97);
+            const padded = clamp(p * HOUSE_OVERROUND, 0.0001, 0.99);
             const line = padded >= 0.5
                 ? -100 * padded / (1 - padded)         // favorite (negative)
                 :  100 * (1 - padded) / padded;        // underdog (positive)
-            // Round to nearest 5 for cleanliness.
-            const rounded = Math.round(line / 5) * 5;
+            // Round to nearest 25 for cleanliness.
+            const rounded = Math.round(line / 25) * 25;
             return rounded;
         }
         function formatAmerican(line) {
             if (line === null || !isFinite(line)) return '--';
-            if (line >= 9995) return '+9999';
-            if (line <= -9995) return '-9999';
+            if (line >= 10000) return '+10000';
+            if (line <= -10000) return '-10000';
             return (line >= 0 ? '+' : '') + line;
         }
 
