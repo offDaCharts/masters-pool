@@ -461,6 +461,50 @@
 
         .hidden { display: none !important; }
 
+        /* === WIN PROBABILITY === */
+        .win-prob {
+            margin-top: 4px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--pga-navy);
+            letter-spacing: 0.3px;
+        }
+
+        .win-prob-label {
+            display: block;
+            font-size: 0.55rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 1px;
+        }
+
+        .win-prob.muted { color: var(--text-muted); opacity: 0.7; }
+
+        .golfer-prob {
+            display: inline-block;
+            font-size: 0.65rem;
+            font-weight: 600;
+            color: var(--pga-gold-deep);
+            background: rgba(212, 175, 55, 0.12);
+            padding: 1px 5px;
+            border-radius: 3px;
+            margin-left: 2px;
+            letter-spacing: 0.3px;
+        }
+
+        .odds-status {
+            text-align: center;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin: -4px 0 14px;
+            font-style: italic;
+        }
+
+        .odds-status.warning { color: #b07a25; }
+
         /* === FOOTER === */
         .footer {
             text-align: center;
@@ -492,6 +536,8 @@
             .score-value { font-size: 1.3rem; }
             .card-golfers { gap: 4px 10px; }
             .golfer-tag { font-size: 0.75rem; }
+            .win-prob { font-size: 0.7rem; }
+            .golfer-prob { font-size: 0.6rem; }
         }
     </style>
 </head>
@@ -543,6 +589,7 @@
         </div>
 
         <div id="roundInfo" class="round-info"></div>
+        <div id="oddsStatus" class="odds-status hidden"></div>
 
         <div id="loading" class="loading-state">
             <div class="loading-spinner"></div>
@@ -717,21 +764,326 @@
             return { golfers, eventName, roundInfo };
         }
 
-        function golferTagHTML(g, isBest) {
+        // === ODDS + PROBABILITY ===
+        // Vercel proxy that wraps The Odds API and caches across all clients.
+        // Update this constant after deploying pga-odds-proxy/ on Vercel.
+        const ODDS_ENDPOINT = "https://pga-odds-proxy.vercel.app/api/odds";
+        const ODDS_LS_KEY = "pga_odds_v1";
+        const ODDS_CLIENT_CACHE_MS = 14 * 60 * 1000;  // slightly under proxy's play-hours TTL
+        const SIM_N = 10000;
+        const SIGMA_PER_ROUND = 3.0;
+        const FALLBACK_WIN_PROB = 0.002;
+        const PRE_CUT_LINE = 3;  // projected cut line in strokes-to-par before R2 finishes
+        let oddsState = { payload: null, ts: 0, error: null };
+
+        async function fetchOdds() {
+            // Try in-memory cache first
+            const now = Date.now();
+            if (oddsState.payload && now - oddsState.ts < ODDS_CLIENT_CACHE_MS) {
+                return oddsState.payload;
+            }
+            // Try localStorage cache next
+            try {
+                const raw = localStorage.getItem(ODDS_LS_KEY);
+                if (raw) {
+                    const { ts, payload } = JSON.parse(raw);
+                    if (payload && now - ts < ODDS_CLIENT_CACHE_MS) {
+                        oddsState = { payload, ts, error: null };
+                        return payload;
+                    }
+                }
+            } catch (_) { /* ignore */ }
+
+            try {
+                const resp = await fetch(ODDS_ENDPOINT, { cache: 'no-store' });
+                if (!resp.ok) throw new Error(`Odds proxy ${resp.status}`);
+                const payload = await resp.json();
+                oddsState = { payload, ts: now, error: null };
+                try {
+                    localStorage.setItem(ODDS_LS_KEY, JSON.stringify({ ts: now, payload }));
+                } catch (_) { /* ignore quota errors */ }
+                return payload;
+            } catch (e) {
+                // Fall back to any previous payload (even stale) if available
+                oddsState.error = e.message || String(e);
+                try {
+                    const raw = localStorage.getItem(ODDS_LS_KEY);
+                    if (raw) {
+                        const { payload } = JSON.parse(raw);
+                        if (payload) { oddsState.payload = payload; return payload; }
+                    }
+                } catch (_) { /* ignore */ }
+                return null;
+            }
+        }
+
+        // Match an odds-API golfer name to a pool pick name. Reuses matchGolfer.
+        function buildOddsLookup(oddsPayload) {
+            const map = new Map();  // pickName -> impliedWinProb
+            if (!oddsPayload || !Array.isArray(oddsPayload.golfers)) return map;
+            for (const entry of POOL) {
+                for (const pick of entry.picks) {
+                    const found = oddsPayload.golfers.find(g => matchGolfer(g.name, pick));
+                    if (found && typeof found.impliedWinProb === 'number') {
+                        map.set(pick, found.impliedWinProb);
+                    }
+                }
+            }
+            return map;
+        }
+
+        // Box-Muller normal sampler.
+        function randn() {
+            let u = 0, v = 0;
+            while (u === 0) u = Math.random();
+            while (v === 0) v = Math.random();
+            return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+        }
+
+        function clamp(x, lo, hi) { return Math.min(hi, Math.max(lo, x)); }
+
+        // Rounds completed for a golfer based on ESPN's period + thru.
+        // 0 = pre-tournament, 1 = R1 done, 2 = R2 done, 3 = R3 done, 4 = finished.
+        function roundsCompleted(g) {
+            if (g.notFound) return 0;
+            const m = g.thru && g.thru.match(/^R(\d)\s*F$/);
+            if (m) return parseInt(m[1], 10);
+            const m2 = g.thru && g.thru.match(/^R(\d)/);
+            if (m2) return parseInt(m2[1], 10) - 1;
+            return 0;
+        }
+
+        // Compute Plackett-Luce strength s_i = -log(1 - p_i) with clipping.
+        function strengthFromProb(p) {
+            if (typeof p !== 'number' || !isFinite(p) || p <= 0) p = FALLBACK_WIN_PROB;
+            return -Math.log(1 - clamp(p, 1e-4, 0.6));
+        }
+
+        // Pre-tournament expected 72-hole score, calibrated by within-pool rank of implied prob.
+        // best in pool ~ -12, worst in pool ~ +15.
+        function muByRank(rank, poolSize) {
+            const span = 27;  // -12 to +15
+            return -12 + (rank - 1) * (span / Math.max(1, poolSize - 1));
+        }
+
+        function computeProbabilities(matchedTeams, oddsMap) {
+            // Flatten to the 20 pool golfers with current score state + implied prob.
+            const golferRows = [];
+            for (const t of matchedTeams) {
+                for (const g of t.golfers) {
+                    const p = oddsMap.get(g.pickName);
+                    golferRows.push({
+                        pickName: g.pickName,
+                        owner: t.owner,
+                        currentScore: g.score === 999 ? null : g.score,
+                        status: g.status,
+                        roundsDone: roundsCompleted(g),
+                        impliedWinProb: typeof p === 'number' ? p : FALLBACK_WIN_PROB,
+                    });
+                }
+            }
+
+            // --- Individual prize: closed-form Plackett-Luce ---
+            let sumS = 0;
+            for (const r of golferRows) {
+                r.strength = (r.status === 'CUT' || r.status === 'WD') ? 0 : strengthFromProb(r.impliedWinProb);
+                sumS += r.strength;
+            }
+            const perGolferBestInPool = {};
+            for (const r of golferRows) {
+                perGolferBestInPool[r.pickName] = sumS > 0 ? r.strength / sumS : 0;
+            }
+            const perTeamIndividualWin = {};
+            for (const t of matchedTeams) {
+                perTeamIndividualWin[t.owner] = t.golfers
+                    .map(g => perGolferBestInPool[g.pickName] || 0)
+                    .reduce((a, b) => a + b, 0);
+            }
+
+            // --- Team prize: Monte Carlo ---
+            // Rank golfers within pool by implied prob, derive μ.
+            const ranked = [...golferRows]
+                .sort((a, b) => b.impliedWinProb - a.impliedWinProb);
+            const poolSize = ranked.length;
+            ranked.forEach((r, i) => {
+                r.mu = muByRank(i + 1, poolSize);
+            });
+
+            // For each golfer prepare simulation parameters.
+            for (const r of golferRows) {
+                const Rdone = clamp(r.roundsDone, 0, 4);
+                const roundsLeft = 4 - Rdone;
+                r.muRemain = r.mu * (roundsLeft / 4);
+                r.sigmaRemain = SIGMA_PER_ROUND * Math.sqrt(roundsLeft);
+                r.startScore = r.currentScore !== null ? r.currentScore : 0;
+                r.ineligible = (r.status === 'CUT' || r.status === 'WD');
+            }
+
+            const ownerToGolfers = new Map();
+            for (const t of matchedTeams) {
+                ownerToGolfers.set(t.owner, t.golfers.map(g => g.pickName));
+            }
+
+            const teamWinCount = new Map();
+            const indivWinCount = new Map();
+            const golferWinCount = new Map();
+            for (const t of matchedTeams) {
+                teamWinCount.set(t.owner, 0);
+                indivWinCount.set(t.owner, 0);
+            }
+            for (const r of golferRows) golferWinCount.set(r.pickName, 0);
+
+            // Determine if cut has effectively passed: if any golfer has roundsDone >= 2 with a known score.
+            const cutResolved = golferRows.some(r => r.roundsDone >= 2);
+
+            for (let sim = 0; sim < SIM_N; sim++) {
+                // Sample final scores.
+                const finals = new Map();
+                let bestScore = Infinity;
+                let bestOwners = [];
+                let bestPicks = [];
+                for (const r of golferRows) {
+                    let final;
+                    if (r.ineligible) {
+                        final = Infinity;  // won't win individual
+                    } else {
+                        const draw = r.muRemain + r.sigmaRemain * randn();
+                        final = r.startScore + draw;
+                    }
+                    finals.set(r.pickName, final);
+                    if (!r.ineligible) {
+                        if (final < bestScore) {
+                            bestScore = final;
+                            bestOwners = [r.owner];
+                            bestPicks = [r.pickName];
+                        } else if (final === bestScore) {
+                            bestOwners.push(r.owner);
+                            bestPicks.push(r.pickName);
+                        }
+                    }
+                }
+
+                // Award individual prize (split on ties).
+                if (bestOwners.length > 0) {
+                    const share = 1 / bestOwners.length;
+                    for (const owner of bestOwners) {
+                        indivWinCount.set(owner, indivWinCount.get(owner) + share);
+                    }
+                    for (const pick of bestPicks) {
+                        golferWinCount.set(pick, golferWinCount.get(pick) + share);
+                    }
+                }
+
+                // Determine cut line for the team prize.
+                // If R2 not yet done: hardcoded projected cut.
+                let cutLine;
+                if (!cutResolved) {
+                    cutLine = PRE_CUT_LINE;
+                } else {
+                    // Use top-65 + ties on R2-end scores. We approximate R2-end as the simulated
+                    // final pro-rated back to round 2 — but during/after R2 we already know
+                    // start_score = R2 result for those with roundsDone >= 2.
+                    const r2Scores = [];
+                    for (const r of golferRows) {
+                        if (r.ineligible) continue;
+                        if (r.roundsDone >= 2) {
+                            r2Scores.push(r.startScore);
+                        } else {
+                            // Approximate R2 score: linear interpolation from startScore towards final.
+                            // For golfers still on the course it's noisy but the cut barely affects
+                            // the favorites anyway, so this is fine.
+                            const final = finals.get(r.pickName);
+                            r2Scores.push(r.startScore + (final - r.startScore) * 0.5);
+                        }
+                    }
+                    r2Scores.sort((a, b) => a - b);
+                    cutLine = r2Scores[Math.min(64, r2Scores.length - 1)];
+                }
+
+                // Award team prize among eligible teams.
+                let bestTeamScore = Infinity;
+                let bestTeamOwners = [];
+                for (const t of matchedTeams) {
+                    let eligible = true;
+                    let sum = 0;
+                    for (const g of t.golfers) {
+                        const row = golferRows.find(r => r.pickName === g.pickName);
+                        if (row.ineligible) { eligible = false; break; }
+                        if (cutResolved && row.roundsDone >= 2 && row.startScore > cutLine) {
+                            eligible = false; break;
+                        }
+                        if (!cutResolved && row.roundsDone < 2) {
+                            // Will face the simulated cut; use approximate R2 score
+                            const final = finals.get(g.pickName);
+                            const r2 = row.startScore + (final - row.startScore) * 0.5;
+                            if (r2 > cutLine) { eligible = false; break; }
+                        }
+                        sum += finals.get(g.pickName);
+                    }
+                    if (!eligible) continue;
+                    if (sum < bestTeamScore) {
+                        bestTeamScore = sum;
+                        bestTeamOwners = [t.owner];
+                    } else if (sum === bestTeamScore) {
+                        bestTeamOwners.push(t.owner);
+                    }
+                }
+                if (bestTeamOwners.length > 0) {
+                    const share = 1 / bestTeamOwners.length;
+                    for (const owner of bestTeamOwners) {
+                        teamWinCount.set(owner, teamWinCount.get(owner) + share);
+                    }
+                }
+            }
+
+            const perTeamTeamWin = {};
+            const perTeamIndividualWinMC = {};
+            for (const t of matchedTeams) {
+                perTeamTeamWin[t.owner] = teamWinCount.get(t.owner) / SIM_N;
+                perTeamIndividualWinMC[t.owner] = indivWinCount.get(t.owner) / SIM_N;
+            }
+
+            // Use MC outputs once any scores exist (more accurate than pre-tournament closed-form).
+            const usingScores = golferRows.some(r => r.currentScore !== null);
+            const perGolferBestInPoolMC = {};
+            for (const r of golferRows) {
+                perGolferBestInPoolMC[r.pickName] = golferWinCount.get(r.pickName) / SIM_N;
+            }
+
+            return {
+                perGolferBestInPool: usingScores ? perGolferBestInPoolMC : perGolferBestInPool,
+                perTeamIndividualWin: usingScores ? perTeamIndividualWinMC : perTeamIndividualWin,
+                perTeamTeamWin,
+                hasOdds: true,
+            };
+        }
+
+        function formatPct(p) {
+            if (typeof p !== 'number' || !isFinite(p) || p < 0) return '--';
+            if (p < 0.005) return '<1%';
+            if (p >= 0.995) return '>99%';
+            return Math.round(p * 100) + '%';
+        }
+
+        function golferTagHTML(g, isBest, bestInPoolProb) {
             const scoreText = g.score === 999 ? '-' : formatScore(g.score);
             const sClass = g.score === 999 ? '' : scoreClass(g.score);
             let badge = '';
             if (g.status === 'CUT') badge = '<span class="golfer-badge badge-cut">CUT</span>';
             if (g.status === 'WD') badge = '<span class="golfer-badge badge-wd">WD</span>';
+            const probBadge = (typeof bestInPoolProb === 'number')
+                ? `<span class="golfer-prob" title="Probability of being the best-scoring golfer in the pool">${formatPct(bestInPoolProb)}</span>`
+                : '';
 
             return `<div class="golfer-tag">
                 <span class="golfer-name ${isBest ? 'best' : ''}">${g.pickName}</span>
                 <span class="golfer-tag-score ${sClass}">${scoreText}</span>
+                ${probBadge}
                 ${badge}
             </div>`;
         }
 
-        function renderStandings(data) {
+        function renderStandings(data, probs) {
             const { golfers, eventName, roundInfo } = data;
             lastData = data;
 
@@ -753,8 +1105,20 @@
                 return { owner: entry.owner, golfers: matched, bestGolfer, teamScore, teamEligible: allActive };
             });
 
-            // Individual view
-            const indSorted = [...poolResults].sort((a, b) => a.bestGolfer.score - b.bestGolfer.score);
+            const hasProbs = probs && probs.hasOdds;
+            const golferProbs = hasProbs ? probs.perGolferBestInPool : {};
+            const indProbs = hasProbs ? probs.perTeamIndividualWin : {};
+            const teamProbs = hasProbs ? probs.perTeamTeamWin : {};
+
+            // Individual view — sorted by win probability when available, otherwise by current best score.
+            const indSorted = [...poolResults].sort((a, b) => {
+                if (hasProbs) {
+                    const pa = indProbs[a.owner] || 0;
+                    const pb = indProbs[b.owner] || 0;
+                    if (pb !== pa) return pb - pa;
+                }
+                return a.bestGolfer.score - b.bestGolfer.score;
+            });
             const indView = document.getElementById('individualView');
             indView.innerHTML = indSorted.map((entry, i) => {
                 const g = entry.bestGolfer;
@@ -762,25 +1126,34 @@
                 const sClass = g.score === 999 ? '' : scoreClass(g.score);
                 const rankClass = i === 0 ? 'leader' : '';
                 const rankCircle = i === 0 ? '' : i === 1 ? ' second' : i === 2 ? ' third' : '';
+                const winProbHTML = hasProbs
+                    ? `<div class="win-prob">${formatPct(indProbs[entry.owner] || 0)}<span class="win-prob-label">Win Prob</span></div>`
+                    : '';
 
                 return `<div class="standing-card ${rankClass}">
                     <div class="card-rank${rankCircle}">${i + 1}</div>
                     <div class="card-body">
                         <div class="card-owner">${entry.owner}</div>
                         <div class="card-golfers">
-                            ${entry.golfers.map(gl => golferTagHTML(gl, gl.pickName === g.pickName)).join('')}
+                            ${entry.golfers.map(gl => golferTagHTML(gl, gl.pickName === g.pickName, golferProbs[gl.pickName])).join('')}
                         </div>
                         ${g.thru ? `<div class="card-thru">${g.thru}</div>` : ''}
                     </div>
                     <div class="card-score">
                         <div class="score-value ${sClass}">${scoreText}</div>
                         <div class="score-label">Best</div>
+                        ${winProbHTML}
                     </div>
                 </div>`;
             }).join('');
 
-            // Team view
+            // Team view — sorted by team win probability when available, otherwise by current combined score.
             const teamSorted = [...poolResults].sort((a, b) => {
+                if (hasProbs) {
+                    const pa = teamProbs[a.owner] || 0;
+                    const pb = teamProbs[b.owner] || 0;
+                    if (pb !== pa) return pb - pa;
+                }
                 if (a.teamEligible && !b.teamEligible) return -1;
                 if (!a.teamEligible && b.teamEligible) return 1;
                 if (a.teamScore === null && b.teamScore === null) return 0;
@@ -795,22 +1168,29 @@
                 const sClass = entry.teamEligible ? scoreClass(entry.teamScore) : '';
                 const isLeader = i === 0 && entry.teamEligible;
                 const rankCircle = isLeader ? '' : i === 1 && entry.teamEligible ? ' second' : i === 2 && entry.teamEligible ? ' third' : '';
+                const tp = teamProbs[entry.owner];
+                const winProbHTML = hasProbs
+                    ? `<div class="win-prob ${!entry.teamEligible ? 'muted' : ''}">${formatPct(tp || 0)}<span class="win-prob-label">Win Prob</span></div>`
+                    : '';
 
                 return `<div class="standing-card ${isLeader ? 'leader' : ''} ${!entry.teamEligible ? 'ineligible' : ''}">
                     <div class="card-rank${rankCircle}">${entry.teamEligible ? i + 1 : '-'}</div>
                     <div class="card-body">
                         <div class="card-owner">${entry.owner}</div>
                         <div class="card-golfers">
-                            ${entry.golfers.map(g => golferTagHTML(g, false)).join('')}
+                            ${entry.golfers.map(g => golferTagHTML(g, false, golferProbs[g.pickName])).join('')}
                         </div>
                         ${!entry.teamEligible ? '<div class="ineligible-note">Ineligible &mdash; missed cut / WD</div>' : ''}
                     </div>
                     <div class="card-score">
                         <div class="score-value ${sClass}">${scoreText}</div>
                         <div class="score-label">Combined</div>
+                        ${winProbHTML}
                     </div>
                 </div>`;
             }).join('');
+
+            return poolResults;
         }
 
         async function update() {
@@ -818,15 +1198,53 @@
             const statusText = document.getElementById('statusText');
             const loadingEl = document.getElementById('loading');
             const errorEl = document.getElementById('error');
+            const oddsStatusEl = document.getElementById('oddsStatus');
 
             try {
-                const data = await fetchLeaderboard();
+                // Fetch scoreboard and odds in parallel.
+                const [data, oddsPayload] = await Promise.all([
+                    fetchLeaderboard(),
+                    fetchOdds(),
+                ]);
                 loadingEl.classList.add('hidden');
                 errorEl.classList.add('hidden');
                 document.getElementById('individualView').classList.toggle('hidden', currentTab !== 'individual');
                 document.getElementById('teamView').classList.toggle('hidden', currentTab !== 'team');
 
-                renderStandings(data);
+                let probs = null;
+                if (oddsPayload && Array.isArray(oddsPayload.golfers) && oddsPayload.golfers.length > 0) {
+                    const oddsMap = buildOddsLookup(oddsPayload);
+                    if (oddsMap.size > 0) {
+                        // Build matched team rows (mirrors logic in renderStandings) for the probability calc.
+                        const matchedTeams = POOL.map(entry => {
+                            const matched = entry.picks.map(pick => {
+                                const found = data.golfers.find(g => matchGolfer(g.name, pick));
+                                return found
+                                    ? { ...found, pickName: pick }
+                                    : { name: pick, pickName: pick, score: 999, status: 'N/A', thru: '-', notFound: true };
+                            });
+                            return { owner: entry.owner, golfers: matched };
+                        });
+                        probs = computeProbabilities(matchedTeams, oddsMap);
+
+                        oddsStatusEl.classList.remove('hidden', 'warning');
+                        const fetchedAt = oddsPayload.fetchedAt ? new Date(oddsPayload.fetchedAt) : null;
+                        const missing = POOL.reduce((acc, e) =>
+                            acc + e.picks.filter(p => !oddsMap.has(p)).length, 0);
+                        const note = fetchedAt
+                            ? `Odds via The Odds API \u2014 last refresh ${fetchedAt.toLocaleTimeString()}`
+                            : 'Odds via The Odds API';
+                        oddsStatusEl.textContent = missing > 0
+                            ? `${note} (${missing} golfer(s) not on board \u2014 using longshot baseline)`
+                            : note;
+                    }
+                } else if (oddsState.error) {
+                    oddsStatusEl.classList.remove('hidden');
+                    oddsStatusEl.classList.add('warning');
+                    oddsStatusEl.textContent = `Odds unavailable \u2014 standings shown without win probabilities`;
+                }
+
+                renderStandings(data, probs);
 
                 statusBar.className = 'status-bar';
                 const now = new Date();
