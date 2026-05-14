@@ -882,7 +882,8 @@
         // 25% overround is typical for outright/futures markets.
         const HOUSE_OVERROUND = 1.25;
         function probToAmerican(p) {
-            if (typeof p !== 'number' || !isFinite(p) || p <= 0) return null;
+            // Zero / unknown probability → show the cap (+10000), not "--".
+            if (typeof p !== 'number' || !isFinite(p) || p <= 0) return 10000;
             const padded = clamp(p * HOUSE_OVERROUND, 0.0001, 0.99);
             const line = padded >= 0.5
                 ? -100 * padded / (1 - padded)         // favorite (negative)
