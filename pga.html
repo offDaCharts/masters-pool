@@ -495,6 +495,18 @@
             letter-spacing: 0.3px;
         }
 
+        .golfer-thru {
+            display: inline-block;
+            font-size: 0.6rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            background: #eceff4;
+            padding: 1px 5px;
+            border-radius: 3px;
+            margin-left: 2px;
+            letter-spacing: 0.3px;
+        }
+
         .odds-status {
             text-align: center;
             font-size: 0.7rem;
@@ -538,6 +550,7 @@
             .golfer-tag { font-size: 0.75rem; }
             .win-prob { font-size: 0.7rem; }
             .golfer-prob { font-size: 0.6rem; }
+            .golfer-thru { font-size: 0.55rem; }
         }
     </style>
 </head>
@@ -760,6 +773,8 @@
                         name, score: totalScore !== null ? totalScore : 999,
                         status: playerStatus, thru: thruDisplay,
                         holesPlayed,
+                        roundThru: c.status?.thru ?? null,
+                        roundNum: c.status?.period ?? null,
                         sortOrder: c.sortOrder || 999,
                     });
                 }
@@ -1111,9 +1126,18 @@
                 ? `<span class="golfer-prob" title="Moneyline odds to be the best-scoring golfer in the pool">${formatAmerican(probToAmerican(bestInPoolProb))}</span>`
                 : '';
 
+            // Today's progress: number of holes played in the current round, or "F".
+            let thruBadge = '';
+            if (g.status !== 'CUT' && g.status !== 'WD' && typeof g.roundThru === 'number') {
+                const t = g.roundThru;
+                if (t === 18) thruBadge = `<span class="golfer-thru" title="Finished the round">F</span>`;
+                else if (t > 0) thruBadge = `<span class="golfer-thru" title="Holes played this round">${t}</span>`;
+            }
+
             return `<div class="golfer-tag">
                 <span class="golfer-name ${isBest ? 'best' : ''}">${g.pickName}</span>
                 <span class="golfer-tag-score ${sClass}">${scoreText}</span>
+                ${thruBadge}
                 ${probBadge}
                 ${badge}
             </div>`;
