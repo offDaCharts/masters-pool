@@ -270,11 +270,73 @@
 
         .round-info {
             text-align: center;
-            margin: -8px 0 16px;
+            margin: -8px 0 8px;
             font-size: 0.8rem;
             color: var(--text-muted);
             font-style: italic;
         }
+
+        .cut-line-info {
+            text-align: center;
+            margin: 0 0 16px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--pga-navy);
+            background: rgba(212, 175, 55, 0.12);
+            border: 1px solid rgba(212, 175, 55, 0.4);
+            border-radius: 4px;
+            padding: 6px 12px;
+        }
+
+        /* === FULL FIELD LIST === */
+        .field-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+            background: #e8eaf0;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        .field-row {
+            display: grid;
+            grid-template-columns: 40px 1fr auto 60px;
+            gap: 12px;
+            align-items: center;
+            padding: 6px 12px;
+            background: #fff;
+            font-size: 0.85rem;
+        }
+        .field-row.field-out { opacity: 0.55; }
+        .field-row.field-pool { background: rgba(212, 175, 55, 0.08); }
+        .field-pos {
+            font-weight: 700;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            text-align: center;
+        }
+        .field-name {
+            color: var(--pga-navy);
+            font-weight: 500;
+        }
+        .field-pool-mark {
+            color: var(--pga-gold-deep);
+            margin-left: 6px;
+            font-size: 0.75rem;
+        }
+        .field-thru {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+        .field-score {
+            text-align: right;
+            font-weight: 700;
+            font-family: 'Playfair Display', serif;
+            font-size: 1rem;
+        }
+        .field-score.under-par { color: var(--crimson); }
+        .field-score.over-par { color: #2c4d80; }
+        .field-score.even-par { color: #555; }
 
         /* === STANDINGS CARDS === */
         .standings-list {
@@ -599,9 +661,11 @@
         <div class="tab-bar">
             <div class="tab active" data-tab="individual" onclick="switchTab('individual')">Best Golfer &mdash; $150</div>
             <div class="tab" data-tab="team" onclick="switchTab('team')">Team Score &mdash; $100</div>
+            <div class="tab" data-tab="field" onclick="switchTab('field')">Full Field</div>
         </div>
 
         <div id="roundInfo" class="round-info"></div>
+        <div id="cutLineInfo" class="cut-line-info hidden"></div>
         <div id="oddsStatus" class="odds-status hidden"></div>
 
         <div id="loading" class="loading-state">
@@ -613,6 +677,7 @@
 
         <div id="individualView" class="standings-list hidden"></div>
         <div id="teamView" class="standings-list hidden"></div>
+        <div id="fieldView" class="field-list hidden"></div>
     </div>
 
     <div class="footer">
@@ -666,6 +731,7 @@
             );
             document.getElementById('individualView').classList.toggle('hidden', tab !== 'individual');
             document.getElementById('teamView').classList.toggle('hidden', tab !== 'team');
+            document.getElementById('fieldView').classList.toggle('hidden', tab !== 'field');
         }
 
         function matchGolfer(espnName, pickName) {
@@ -729,6 +795,7 @@
             const golfers = [];
             const eventName = event.name || 'PGA Championship';
             let roundInfo = '';
+            let eventCurrentRound = null;
             if (event.status) roundInfo = event.status;
 
             const competitions = event.competitions || [];
@@ -736,6 +803,7 @@
                 const competitors = comp.competitors || [];
                 roundInfo = comp.status?.type?.detail || roundInfo;
                 const currentRound = comp.status?.period || null;
+                if (currentRound) eventCurrentRound = currentRound;
 
                 for (const c of competitors) {
                     const athlete = c.athlete || {};
@@ -778,17 +846,45 @@
                     if (playerStatus === 'CUT') thruDisplay = 'CUT';
                     if (playerStatus === 'WD') thruDisplay = 'WD';
 
+                    // Per-round scores from linescores (signed to-par per round).
+                    const r1Score = parseScoreFromText(c.linescores?.[0]?.displayValue);
+
                     golfers.push({
                         name, score: totalScore !== null ? totalScore : 999,
                         status: playerStatus, thru: thruDisplay,
                         holesPlayed,
                         roundThru,
                         roundNum,
+                        r1Score,
                         sortOrder: c.sortOrder || 999,
                     });
                 }
             }
-            return { golfers, eventName, roundInfo };
+            return { golfers, eventName, roundInfo, currentRound: eventCurrentRound };
+        }
+
+        // Projected cut line: 65th-lowest R2-end score, plus ties.
+        // Mid-R2 golfers' R2-end is projected by pace from R1; pre-R2 golfers are skipped.
+        function computeProjectedCut(golfers) {
+            const r2Ends = [];
+            let finished = 0;
+            for (const g of golfers) {
+                if (g.status === 'WD') continue;
+                if (g.score === 999) continue;
+                if (g.holesPlayed >= 36) {
+                    r2Ends.push(g.score);
+                    finished++;
+                } else if (g.holesPlayed > 18 && g.r1Score !== null) {
+                    const holesIn = g.holesPlayed - 18;
+                    const r2Partial = g.score - g.r1Score;
+                    const projR2 = (r2Partial / holesIn) * 18;
+                    r2Ends.push(g.r1Score + projR2);
+                }
+            }
+            if (r2Ends.length < 65) return null;
+            r2Ends.sort((a, b) => a - b);
+            const cut = Math.round(r2Ends[64]);
+            return { cutLine: cut, finished, total: golfers.length };
         }
 
         // === ODDS + PROBABILITY ===
@@ -1132,11 +1228,26 @@
         }
 
         function renderStandings(data, probs) {
-            const { golfers, eventName, roundInfo } = data;
+            const { golfers, eventName, roundInfo, currentRound } = data;
             lastData = data;
 
             document.getElementById('roundInfo').textContent =
                 `${eventName}${roundInfo ? ' \u2014 ' + roundInfo : ''}`;
+
+            // Cut line — only meaningful during R2 (Friday).
+            const cutEl = document.getElementById('cutLineInfo');
+            if (currentRound === 2) {
+                const cut = computeProjectedCut(golfers);
+                if (cut) {
+                    const label = cut.finished >= cut.total - 5 ? 'Cut line' : 'Projected cut';
+                    cutEl.textContent = `${label}: ${formatScore(cut.cutLine)} (${cut.finished} of ${cut.total} through R2)`;
+                    cutEl.classList.remove('hidden');
+                } else {
+                    cutEl.classList.add('hidden');
+                }
+            } else {
+                cutEl.classList.add('hidden');
+            }
 
             const poolResults = POOL.map(entry => {
                 const matched = entry.picks.map(pick => {
@@ -1227,6 +1338,45 @@
                 </div>`;
             }).join('');
 
+            // Field view — full leaderboard, sorted by score (CUT/WD pushed to bottom).
+            const poolPickSet = new Set();
+            for (const e of POOL) for (const p of e.picks) poolPickSet.add(p);
+            const fieldSorted = [...golfers].sort((a, b) => {
+                const aOut = a.status === 'CUT' || a.status === 'WD' || a.score === 999;
+                const bOut = b.status === 'CUT' || b.status === 'WD' || b.score === 999;
+                if (aOut !== bOut) return aOut ? 1 : -1;
+                return a.score - b.score;
+            });
+            // Compute leaderboard positions with ties (active golfers only).
+            const fieldPos = new Map();
+            let lastScore = null;
+            let lastPos = 0;
+            let seen = 0;
+            for (const g of fieldSorted) {
+                if (g.status === 'CUT' || g.status === 'WD' || g.score === 999) continue;
+                seen++;
+                if (g.score !== lastScore) { lastPos = seen; lastScore = g.score; }
+                fieldPos.set(g.name, lastPos);
+            }
+            const fieldView = document.getElementById('fieldView');
+            fieldView.innerHTML = fieldSorted.map(g => {
+                const out = g.status === 'CUT' || g.status === 'WD';
+                const pos = out ? (g.status === 'CUT' ? 'CUT' : 'WD') : (fieldPos.get(g.name) ?? '-');
+                const scoreText = g.score === 999 ? '-' : formatScore(g.score);
+                const sClass = g.score === 999 ? '' : scoreClass(g.score);
+                const isPoolPick = [...poolPickSet].some(pick => matchGolfer(g.name, pick));
+                let thruText = g.thru || '';
+                if (g.roundThru === 18) thruText = `R${g.roundNum} F`;
+                else if (typeof g.roundThru === 'number' && g.roundThru > 0) thruText = `R${g.roundNum} Thru ${g.roundThru}`;
+                if (out) thruText = '';
+                return `<div class="field-row ${out ? 'field-out' : ''} ${isPoolPick ? 'field-pool' : ''}">
+                    <div class="field-pos">${pos}</div>
+                    <div class="field-name">${g.name}${isPoolPick ? '<span class="field-pool-mark" title="In the pool">\u2605</span>' : ''}</div>
+                    <div class="field-thru">${thruText}</div>
+                    <div class="field-score ${sClass}">${scoreText}</div>
+                </div>`;
+            }).join('');
+
             return poolResults;
         }
 
@@ -1247,6 +1397,7 @@
                 errorEl.classList.add('hidden');
                 document.getElementById('individualView').classList.toggle('hidden', currentTab !== 'individual');
                 document.getElementById('teamView').classList.toggle('hidden', currentTab !== 'team');
+                document.getElementById('fieldView').classList.toggle('hidden', currentTab !== 'field');
 
                 let probs = null;
                 if (oddsPayload && Array.isArray(oddsPayload.golfers) && oddsPayload.golfers.length > 0) {
