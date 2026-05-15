@@ -1033,31 +1033,10 @@
                 }
 
                 // Determine cut line for the team prize.
-                // If R2 not yet done: hardcoded projected cut.
-                let cutLine;
-                if (!cutResolved) {
-                    cutLine = PRE_CUT_LINE;
-                } else {
-                    // Use top-65 + ties on R2-end scores. We approximate R2-end as the simulated
-                    // final pro-rated back to round 2 — but during/after R2 we already know
-                    // start_score = R2 result for those with roundsDone >= 2.
-                    const r2Scores = [];
-                    for (const r of golferRows) {
-                        if (r.ineligible) continue;
-                        if (r.holesPlayedFrac >= 36 / 72) {
-                            r2Scores.push(r.startScore);
-                        } else {
-                            // Approximate R2-end score: linear interpolation from startScore towards final.
-                            const final = finals.get(r.pickName);
-                            r2Scores.push(r.startScore + (final - r.startScore) * 0.5);
-                        }
-                    }
-                    r2Scores.sort((a, b) => a - b);
-                    // Note: our pool of 20 isn't the full field — we use a pool-wide median as a
-                    // proxy for the field cut. Most pool golfers are favorites, so this is roughly
-                    // top-50% of the pool ≈ cut line in the field.
-                    cutLine = r2Scores[Math.floor(r2Scores.length / 2)] ?? PRE_CUT_LINE;
-                }
+                // We *don't* simulate the field — the pool is favorites-skewed, so using its
+                // median as a cut proxy is artificially low and incorrectly eliminates teams
+                // that would survive a real PGA Championship cut. Use the static projection.
+                const cutLine = PRE_CUT_LINE;
 
                 // Award team prize among eligible teams.
                 let bestTeamScore = Infinity;
@@ -1140,7 +1119,7 @@
             if (g.status !== 'CUT' && g.status !== 'WD' && typeof g.roundThru === 'number') {
                 const t = g.roundThru;
                 if (t === 18) thruBadge = `<span class="golfer-thru" title="Finished the round">F</span>`;
-                else if (t > 0) thruBadge = `<span class="golfer-thru" title="Holes played this round">${t}</span>`;
+                else if (t > 0) thruBadge = `<span class="golfer-thru" title="Holes played this round">Thru ${t}</span>`;
             }
 
             return `<div class="golfer-tag">
