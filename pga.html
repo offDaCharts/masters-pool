@@ -735,6 +735,7 @@
             for (const comp of competitions) {
                 const competitors = comp.competitors || [];
                 roundInfo = comp.status?.type?.detail || roundInfo;
+                const currentRound = comp.status?.period || null;
 
                 for (const c of competitors) {
                     const athlete = c.athlete || {};
@@ -756,15 +757,23 @@
                     if (status === 'cut' || (c.status?.type?.id === '3')) playerStatus = 'CUT';
                     else if (status === 'wd' || status === 'withdrawn') playerStatus = 'WD';
 
+                    // Compute current-round holes played from the linescores array,
+                    // which works whether or not c.status is populated.
+                    let roundNum = c.status?.period ?? currentRound;
+                    let roundThru = (typeof c.status?.thru === 'number') ? c.status.thru : null;
+                    if (roundThru === null && Array.isArray(c.linescores) && roundNum) {
+                        const roundLs = c.linescores.find(l => l.period === roundNum);
+                        const subs = roundLs?.linescores;
+                        if (Array.isArray(subs)) roundThru = subs.length;
+                    }
+
                     let thruDisplay = '';
                     let holesPlayed = 0;
-                    if (c.status?.period) {
-                        const round = c.status.period;
-                        const thruHoles = c.status.thru;
-                        holesPlayed = (round - 1) * 18 + (thruHoles || 0);
-                        if (thruHoles === 18 || thruHoles === 0) thruDisplay = `R${round} F`;
-                        else if (thruHoles) thruDisplay = `R${round} Thru ${thruHoles}`;
-                        else thruDisplay = `R${round}`;
+                    if (roundNum) {
+                        const t = roundThru ?? 0;
+                        holesPlayed = (roundNum - 1) * 18 + t;
+                        if (t === 18 || t === 0) thruDisplay = `R${roundNum} F`;
+                        else thruDisplay = `R${roundNum} Thru ${t}`;
                     }
                     if (playerStatus === 'CUT') thruDisplay = 'CUT';
                     if (playerStatus === 'WD') thruDisplay = 'WD';
@@ -773,8 +782,8 @@
                         name, score: totalScore !== null ? totalScore : 999,
                         status: playerStatus, thru: thruDisplay,
                         holesPlayed,
-                        roundThru: c.status?.thru ?? null,
-                        roundNum: c.status?.period ?? null,
+                        roundThru,
+                        roundNum,
                         sortOrder: c.sortOrder || 999,
                     });
                 }
