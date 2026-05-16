@@ -850,6 +850,16 @@
                     if (status === 'cut' || (c.status?.type?.id === '3')) playerStatus = 'CUT';
                     else if (status === 'wd' || status === 'withdrawn') playerStatus = 'WD';
 
+                    const linescoreCount = Array.isArray(c.linescores) ? c.linescores.length : 0;
+                    const hasCompletedTwoRounds = linescoreCount >= 2;
+                    const completed72 = typeof c.status?.type?.completed === 'boolean' ? c.status.type.completed : false;
+
+                    // ESPN doesn't always mark missed-cut players as CUT after the weekend starts.
+                    // If a golfer only has two rounds logged once Round 3+ is underway, treat them as CUT.
+                    if (playerStatus === 'active' && eventCurrentRound >= 3 && hasCompletedTwoRounds && !completed72) {
+                        playerStatus = 'CUT';
+                    }
+
                     // Compute current-round holes played from the linescores array,
                     // which works whether or not c.status is populated.
                     let roundNum = c.status?.period ?? currentRound;
@@ -1283,10 +1293,10 @@
                 });
 
                 const bestGolfer = matched.reduce((a, b) => a.score <= b.score ? a : b);
-                const allActive = matched.every(g => g.status === 'active');
-                const teamScore = allActive ? matched.reduce((sum, g) => sum + g.score, 0) : null;
+                const teamEligible = matched.every(g => g.status === 'active');
+                const teamScore = teamEligible ? matched.reduce((sum, g) => sum + g.score, 0) : null;
 
-                return { owner: entry.owner, golfers: matched, bestGolfer, teamScore, teamEligible: allActive };
+                return { owner: entry.owner, golfers: matched, bestGolfer, teamScore, teamEligible };
             });
 
             const hasProbs = probs && probs.hasOdds;
@@ -1341,9 +1351,9 @@
                 const sClass = entry.teamEligible ? scoreClass(entry.teamScore) : '';
                 const isLeader = i === 0 && entry.teamEligible;
                 const rankCircle = isLeader ? '' : i === 1 && entry.teamEligible ? ' second' : i === 2 && entry.teamEligible ? ' third' : '';
-                const tp = teamProbs[entry.owner];
+                const tp = entry.teamEligible ? teamProbs[entry.owner] : 0;
                 const winProbHTML = hasProbs
-                    ? `<div class="win-prob ${!entry.teamEligible ? 'muted' : ''}">${formatAmerican(probToAmerican(tp || 0))}<span class="win-prob-label">Team Win Odds</span></div>`
+                    ? `<div class="win-prob ${!entry.teamEligible ? 'muted' : ''}">${entry.teamEligible ? formatAmerican(probToAmerican(tp || 0)) : 'CUT'}<span class="win-prob-label">Team Win Odds</span></div>`
                     : '';
 
                 return `<div class="standing-card ${isLeader ? 'leader' : ''} ${!entry.teamEligible ? 'ineligible' : ''}">
