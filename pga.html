@@ -307,7 +307,14 @@
             font-size: 0.85rem;
         }
         .field-row.field-out { opacity: 0.55; }
+        .field-row.field-cut {
+            opacity: 1;
+            background: rgba(194, 34, 67, 0.08);
+            border-left: 3px solid var(--crimson);
+            padding-left: 9px;
+        }
         .field-row.field-pool { background: rgba(212, 175, 55, 0.08); }
+        .field-row.field-cut.field-pool { background: linear-gradient(90deg, rgba(194, 34, 67, 0.08), rgba(212, 175, 55, 0.08)); }
         .field-pos {
             font-weight: 700;
             color: var(--text-muted);
@@ -540,6 +547,15 @@
             color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 1px;
+            margin-top: 1px;
+        }
+
+        .win-prob-sublabel {
+            display: block;
+            font-size: 0.5rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            letter-spacing: 0.4px;
             margin-top: 1px;
         }
 
@@ -1204,9 +1220,9 @@
             const scoreText = g.score === 999 ? '-' : formatScore(g.score);
             const sClass = g.score === 999 ? '' : scoreClass(g.score);
             let badge = '';
-            if (g.status === 'CUT') badge = '<span class="golfer-badge badge-cut">CUT</span>';
-            if (g.status === 'WD') badge = '<span class="golfer-badge badge-wd">WD</span>';
-            const probBadge = (typeof bestInPoolProb === 'number')
+            if (g.status === 'CUT') badge = '<span class="golfer-badge badge-cut" title="Missed the cut">CUT</span>';
+            if (g.status === 'WD') badge = '<span class="golfer-badge badge-wd" title="Withdrawn">WD</span>';
+            const probBadge = (typeof bestInPoolProb === 'number' && g.status !== 'CUT' && g.status !== 'WD')
                 ? `<span class="golfer-prob" title="Moneyline odds to be the best-scoring golfer in the pool">${formatAmerican(probToAmerican(bestInPoolProb))}</span>`
                 : '';
 
@@ -1280,7 +1296,7 @@
                 const rankClass = i === 0 ? 'leader' : '';
                 const rankCircle = i === 0 ? '' : i === 1 ? ' second' : i === 2 ? ' third' : '';
                 const winProbHTML = hasProbs
-                    ? `<div class="win-prob">${formatAmerican(probToAmerican(indProbs[entry.owner] || 0))}<span class="win-prob-label">To Win</span></div>`
+                    ? `<div class="win-prob">${formatAmerican(probToAmerican(indProbs[entry.owner] || 0))}<span class="win-prob-label">Best Ball Odds</span><span class="win-prob-sublabel">among pool golfers, not tournament outright</span></div>`
                     : '';
 
                 return `<div class="standing-card ${rankClass}">
@@ -1318,7 +1334,7 @@
                 const rankCircle = isLeader ? '' : i === 1 && entry.teamEligible ? ' second' : i === 2 && entry.teamEligible ? ' third' : '';
                 const tp = teamProbs[entry.owner];
                 const winProbHTML = hasProbs
-                    ? `<div class="win-prob ${!entry.teamEligible ? 'muted' : ''}">${formatAmerican(probToAmerican(tp || 0))}<span class="win-prob-label">To Win</span></div>`
+                    ? `<div class="win-prob ${!entry.teamEligible ? 'muted' : ''}">${formatAmerican(probToAmerican(tp || 0))}<span class="win-prob-label">Team Win Odds</span><span class="win-prob-sublabel">to win this pool</span></div>`
                     : '';
 
                 return `<div class="standing-card ${isLeader ? 'leader' : ''} ${!entry.teamEligible ? 'ineligible' : ''}">
@@ -1361,6 +1377,7 @@
             const fieldView = document.getElementById('fieldView');
             fieldView.innerHTML = fieldSorted.map(g => {
                 const out = g.status === 'CUT' || g.status === 'WD';
+                const isCut = g.status === 'CUT';
                 const pos = out ? (g.status === 'CUT' ? 'CUT' : 'WD') : (fieldPos.get(g.name) ?? '-');
                 const scoreText = g.score === 999 ? '-' : formatScore(g.score);
                 const sClass = g.score === 999 ? '' : scoreClass(g.score);
@@ -1369,7 +1386,7 @@
                 if (g.roundThru === 18) thruText = `R${g.roundNum} F`;
                 else if (typeof g.roundThru === 'number' && g.roundThru > 0) thruText = `R${g.roundNum} Thru ${g.roundThru}`;
                 if (out) thruText = '';
-                return `<div class="field-row ${out ? 'field-out' : ''} ${isPoolPick ? 'field-pool' : ''}">
+                return `<div class="field-row ${out ? 'field-out' : ''} ${isCut ? 'field-cut' : ''} ${isPoolPick ? 'field-pool' : ''}">
                     <div class="field-pos">${pos}</div>
                     <div class="field-name">${g.name}${isPoolPick ? '<span class="field-pool-mark" title="In the pool">\u2605</span>' : ''}</div>
                     <div class="field-thru">${thruText}</div>
@@ -1436,8 +1453,8 @@
                             ? `Odds via The Odds API \u2014 last refresh ${fetchedAt.toLocaleTimeString()}`
                             : 'Odds via The Odds API';
                         oddsStatusEl.textContent = missing > 0
-                            ? `${note} (${missing} golfer(s) not on board \u2014 using longshot baseline)`
-                            : note;
+                            ? `${note} (${missing} golfer(s) not on board \u2014 using longshot baseline). Displayed odds are pool win/best-ball odds, not tournament outright odds.`
+                            : `${note}. Displayed odds are pool win/best-ball odds, not tournament outright odds.`;
                     }
                 } else if (oddsState.error) {
                     oddsStatusEl.classList.remove('hidden');
