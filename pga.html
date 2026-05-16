@@ -723,6 +723,13 @@
             { owner: "Kasey",  picks: ["Collin Morikawa", "Justin Thomas"] },
         ];
 
+        const MISSED_CUT = new Set([
+            'Rickie Fowler',
+            'Jordan Spieth',
+            'Alex Fitzpatrick',
+            'Sahith Theegala',
+        ]);
+
         const NAME_ALIASES = {
             "Scottie Scheffler": ["scheffler"],
             "Russell Henley": ["henley"],
@@ -847,18 +854,8 @@
                     }
 
                     let playerStatus = 'active';
-                    if (status === 'cut' || (c.status?.type?.id === '3')) playerStatus = 'CUT';
+                    if (status === 'cut' || (c.status?.type?.id === '3') || MISSED_CUT.has(name)) playerStatus = 'CUT';
                     else if (status === 'wd' || status === 'withdrawn') playerStatus = 'WD';
-
-                    const linescoreCount = Array.isArray(c.linescores) ? c.linescores.length : 0;
-                    const hasCompletedTwoRounds = linescoreCount >= 2;
-                    const completed72 = typeof c.status?.type?.completed === 'boolean' ? c.status.type.completed : false;
-
-                    // ESPN doesn't always mark missed-cut players as CUT after the weekend starts.
-                    // If a golfer only has two rounds logged once Round 3+ is underway, treat them as CUT.
-                    if (playerStatus === 'active' && eventCurrentRound >= 3 && hasCompletedTwoRounds && !completed72) {
-                        playerStatus = 'CUT';
-                    }
 
                     // Compute current-round holes played from the linescores array,
                     // which works whether or not c.status is populated.
@@ -1353,7 +1350,7 @@
                 const rankCircle = isLeader ? '' : i === 1 && entry.teamEligible ? ' second' : i === 2 && entry.teamEligible ? ' third' : '';
                 const tp = entry.teamEligible ? teamProbs[entry.owner] : 0;
                 const winProbHTML = hasProbs
-                    ? `<div class="win-prob ${!entry.teamEligible ? 'muted' : ''}">${entry.teamEligible ? formatAmerican(probToAmerican(tp || 0)) : 'CUT'}<span class="win-prob-label">Team Win Odds</span></div>`
+                    ? `<div class="win-prob ${!entry.teamEligible ? 'muted' : ''}">${entry.teamEligible ? formatAmerican(probToAmerican(tp || 0)) : 'OUT'}<span class="win-prob-label">Team Win Odds</span></div>`
                     : '';
 
                 return `<div class="standing-card ${isLeader ? 'leader' : ''} ${!entry.teamEligible ? 'ineligible' : ''}">
