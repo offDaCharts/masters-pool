@@ -427,6 +427,20 @@
             color: var(--text-muted);
         }
 
+        .golfer-tag-cut {
+            background: rgba(194, 34, 67, 0.08);
+            border-left: 3px solid var(--crimson);
+            padding: 2px 6px 2px 7px;
+            border-radius: 4px;
+        }
+
+        .golfer-tag-wd {
+            background: rgba(230, 162, 60, 0.1);
+            border-left: 3px solid #e6a23c;
+            padding: 2px 6px 2px 7px;
+            border-radius: 4px;
+        }
+
         .golfer-name { font-weight: 500; }
 
         .golfer-name.best {
@@ -455,7 +469,11 @@
             text-transform: uppercase;
         }
 
-        .badge-cut { color: #fff; background: var(--crimson); }
+        .badge-cut {
+            color: #fff;
+            background: var(--crimson);
+            box-shadow: 0 0 0 1px rgba(194, 34, 67, 0.18);
+        }
         .badge-wd { color: #fff; background: #e6a23c; }
 
         .card-thru {
@@ -469,7 +487,7 @@
             font-size: 0.7rem;
             color: var(--crimson);
             margin-top: 2px;
-            font-weight: 500;
+            font-weight: 700;
         }
 
         .card-score {
@@ -547,15 +565,6 @@
             color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 1px;
-            margin-top: 1px;
-        }
-
-        .win-prob-sublabel {
-            display: block;
-            font-size: 0.5rem;
-            font-weight: 500;
-            color: var(--text-muted);
-            letter-spacing: 0.4px;
             margin-top: 1px;
         }
 
@@ -1234,7 +1243,7 @@
                 else if (t > 0) thruBadge = `<span class="golfer-thru" title="Holes played this round">Thru ${t}</span>`;
             }
 
-            return `<div class="golfer-tag">
+            return `<div class="golfer-tag ${g.status === 'CUT' ? 'golfer-tag-cut' : ''} ${g.status === 'WD' ? 'golfer-tag-wd' : ''}">
                 <span class="golfer-name ${isBest ? 'best' : ''}">${g.pickName}</span>
                 <span class="golfer-tag-score ${sClass}">${scoreText}</span>
                 ${thruBadge}
@@ -1296,7 +1305,7 @@
                 const rankClass = i === 0 ? 'leader' : '';
                 const rankCircle = i === 0 ? '' : i === 1 ? ' second' : i === 2 ? ' third' : '';
                 const winProbHTML = hasProbs
-                    ? `<div class="win-prob">${formatAmerican(probToAmerican(indProbs[entry.owner] || 0))}<span class="win-prob-label">Best Ball Odds</span><span class="win-prob-sublabel">among pool golfers, not tournament outright</span></div>`
+                    ? `<div class="win-prob">${formatAmerican(probToAmerican(indProbs[entry.owner] || 0))}<span class="win-prob-label">Best Ball Odds</span></div>`
                     : '';
 
                 return `<div class="standing-card ${rankClass}">
@@ -1334,7 +1343,7 @@
                 const rankCircle = isLeader ? '' : i === 1 && entry.teamEligible ? ' second' : i === 2 && entry.teamEligible ? ' third' : '';
                 const tp = teamProbs[entry.owner];
                 const winProbHTML = hasProbs
-                    ? `<div class="win-prob ${!entry.teamEligible ? 'muted' : ''}">${formatAmerican(probToAmerican(tp || 0))}<span class="win-prob-label">Team Win Odds</span><span class="win-prob-sublabel">to win this pool</span></div>`
+                    ? `<div class="win-prob ${!entry.teamEligible ? 'muted' : ''}">${formatAmerican(probToAmerican(tp || 0))}<span class="win-prob-label">Team Win Odds</span></div>`
                     : '';
 
                 return `<div class="standing-card ${isLeader ? 'leader' : ''} ${!entry.teamEligible ? 'ineligible' : ''}">
