@@ -723,13 +723,6 @@
             { owner: "Kasey",  picks: ["Collin Morikawa", "Justin Thomas"] },
         ];
 
-        const MISSED_CUT = new Set([
-            'Rickie Fowler',
-            'Jordan Spieth',
-            'Alex Fitzpatrick',
-            'Sahith Theegala',
-        ]);
-
         const NAME_ALIASES = {
             "Scottie Scheffler": ["scheffler"],
             "Russell Henley": ["henley"],
@@ -854,7 +847,7 @@
                     }
 
                     let playerStatus = 'active';
-                    if (status === 'cut' || (c.status?.type?.id === '3') || MISSED_CUT.has(name)) playerStatus = 'CUT';
+                    if (status === 'cut' || (c.status?.type?.id === '3')) playerStatus = 'CUT';
                     else if (status === 'wd' || status === 'withdrawn') playerStatus = 'WD';
 
                     // Compute current-round holes played from the linescores array,
