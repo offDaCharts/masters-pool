@@ -850,6 +850,17 @@
                     if (status === 'cut' || (c.status?.type?.id === '3')) playerStatus = 'CUT';
                     else if (status === 'wd' || status === 'withdrawn') playerStatus = 'WD';
 
+                    // Fallback cut detection: ESPN's scoreboard often leaves c.status null
+                    // mid-tournament. Once R3 has started, anyone without a linescore entry
+                    // for period >= 3 missed the cut (PGA Championship cuts after R2).
+                    const hasPostCutRound = Array.isArray(c.linescores)
+                        && c.linescores.some(l => (l?.period || 0) >= 3);
+                    if (playerStatus === 'active'
+                        && currentRound && currentRound >= 3
+                        && !hasPostCutRound) {
+                        playerStatus = 'CUT';
+                    }
+
                     // Compute current-round holes played from the linescores array,
                     // which works whether or not c.status is populated.
                     let roundNum = c.status?.period ?? currentRound;
@@ -1353,7 +1364,7 @@
                         <div class="card-golfers">
                             ${entry.golfers.map(g => golferTagHTML(g, false, golferProbs[g.pickName])).join('')}
                         </div>
-                        ${!entry.teamEligible ? '<div class="ineligible-note">Ineligible &mdash; missed cut / WD</div>' : ''}
+                        ${!entry.teamEligible ? `<div class="ineligible-note">Team eliminated &mdash; ${entry.golfers.filter(g => g.status === 'CUT' || g.status === 'WD').map(g => g.pickName + ' ' + (g.status === 'CUT' ? 'missed cut' : 'WD')).join(', ')}. Team prize requires both golfers to make the cut.</div>` : ''}
                     </div>
                     <div class="card-score">
                         <div class="score-value ${sClass}">${scoreText}</div>
