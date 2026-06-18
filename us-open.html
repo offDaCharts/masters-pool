@@ -1289,7 +1289,7 @@
             if (g.status === 'CUT') badge = '<span class="golfer-badge badge-cut" title="Missed the cut">CUT</span>';
             if (g.status === 'WD') badge = '<span class="golfer-badge badge-wd" title="Withdrawn">WD</span>';
             const probBadge = (typeof bestInPoolProb === 'number' && g.status !== 'CUT' && g.status !== 'WD')
-                ? `<span class="golfer-prob" title="Moneyline odds to be the best-scoring golfer in the pool">${formatAmerican(probToAmerican(bestInPoolProb))}</span>`
+                ? `<span class="golfer-prob" title="Pool odds to be the best-scoring golfer in this group">${formatAmerican(probToAmerican(bestInPoolProb))}</span>`
                 : '';
 
             // Today's progress: number of holes played in the current round, or "F".
@@ -1362,7 +1362,7 @@
                 const rankClass = i === 0 ? 'leader' : '';
                 const rankCircle = i === 0 ? '' : i === 1 ? ' second' : i === 2 ? ' third' : '';
                 const winProbHTML = hasProbs
-                    ? `<div class="win-prob">${formatAmerican(probToAmerican(indProbs[entry.owner] || 0))}<span class="win-prob-label">Best Ball Odds</span></div>`
+                    ? `<div class="win-prob">${formatAmerican(probToAmerican(indProbs[entry.owner] || 0))}<span class="win-prob-label">Pool Best Ball</span></div>`
                     : '';
 
                 return `<div class="standing-card ${rankClass}">
@@ -1400,7 +1400,7 @@
                 const rankCircle = isLeader ? '' : i === 1 && entry.teamEligible ? ' second' : i === 2 && entry.teamEligible ? ' third' : '';
                 const tp = entry.teamEligible ? teamProbs[entry.owner] : 0;
                 const winProbHTML = hasProbs
-                    ? `<div class="win-prob ${!entry.teamEligible ? 'muted' : ''}">${entry.teamEligible ? formatAmerican(probToAmerican(tp || 0)) : 'OUT'}<span class="win-prob-label">Team Win Odds</span></div>`
+                    ? `<div class="win-prob ${!entry.teamEligible ? 'muted' : ''}">${entry.teamEligible ? formatAmerican(probToAmerican(tp || 0)) : 'OUT'}<span class="win-prob-label">Pool Team</span></div>`
                     : '';
 
                 return `<div class="standing-card ${isLeader ? 'leader' : ''} ${!entry.teamEligible ? 'ineligible' : ''}">
@@ -1521,8 +1521,8 @@
                                 ? `Odds via The Odds API \u2014 last refresh ${fetchedAt.toLocaleTimeString()}`
                                 : 'Odds via The Odds API';
                         oddsStatusEl.textContent = missing > 0
-                            ? `${note} (${missing} golfer(s) not on board \u2014 using longshot baseline). Displayed odds are pool win/best-ball odds, not tournament outright odds.`
-                            : `${note}. Displayed odds are pool win/best-ball odds, not tournament outright odds.`;
+                            ? `${note} (${missing} golfer(s) not on board \u2014 using longshot baseline). Displayed odds are pool projections, not tournament outright odds.`
+                            : `${note}. Displayed odds are pool projections, not tournament outright odds.`;
                     }
                 } else {
                     oddsStatusEl.classList.add('hidden');
