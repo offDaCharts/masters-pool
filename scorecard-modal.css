@@ -256,12 +256,106 @@ body.scorecard-open {
 .scorecard-legend .over::before { border: 2px solid #a6464f; }
 
 @media (max-width: 640px) {
-    .scorecard-modal { padding: 10px; align-items: end; }
-    .scorecard-dialog { width: 100%; max-height: 92vh; border-radius: 15px 15px 8px 8px; }
-    .scorecard-header { padding: 18px 17px 15px; }
-    .scorecard-content { padding: 17px 14px 20px; }
-    .scorecard-overview { gap: 7px; }
-    .scorecard-overall, .scorecard-round-chip { min-width: 78px; padding: 8px 10px; }
+    .scorecard-modal {
+        align-items: end;
+        padding:
+            8px
+            max(6px, env(safe-area-inset-right))
+            max(8px, env(safe-area-inset-bottom))
+            max(6px, env(safe-area-inset-left));
+    }
+
+    .scorecard-dialog {
+        width: 100%;
+        max-height: 92vh;
+        max-height: calc(100dvh - max(16px, env(safe-area-inset-bottom)));
+        border-radius: 15px 15px 8px 8px;
+    }
+
+    .scorecard-header {
+        gap: 12px;
+        padding: 16px 14px 13px;
+    }
+
+    .scorecard-title {
+        font-size: clamp(1.35rem, 7vw, 1.8rem);
+    }
+
+    .scorecard-subtitle {
+        margin-top: 5px;
+        line-height: 1.35;
+    }
+
+    .scorecard-close {
+        width: 44px;
+        height: 44px;
+    }
+
+    .scorecard-content {
+        padding: 14px 8px max(17px, env(safe-area-inset-bottom));
+    }
+
+    .scorecard-overview {
+        gap: 6px;
+        margin-bottom: 15px;
+    }
+
+    .scorecard-overall,
+    .scorecard-round-chip {
+        box-sizing: border-box;
+        flex: 1 1 74px;
+        min-width: 74px;
+        padding: 8px 9px;
+    }
+
+    .scorecard-nine + .scorecard-nine {
+        margin-top: 15px;
+    }
+
+    .scorecard-table-wrap {
+        overflow-x: hidden;
+        border-radius: 8px;
+    }
+
+    .scorecard-table {
+        min-width: 0;
+        font-size: 0.68rem;
+    }
+
+    .scorecard-table th,
+    .scorecard-table td {
+        height: 36px;
+        padding: 2px 1px;
+    }
+
+    .scorecard-table thead th,
+    .scorecard-table .par-row {
+        font-size: 0.59rem;
+    }
+
+    .scorecard-table .row-label {
+        width: 38px;
+    }
+
+    .scorecard-table .total-column {
+        width: 33px;
+    }
+
+    .score-mark {
+        box-sizing: border-box;
+        width: 22px;
+        height: 22px;
+    }
+
+    .score-mark.eagle,
+    .score-mark.double {
+        border-width: 3px;
+    }
+
+    .scorecard-legend {
+        justify-content: center;
+        margin-top: 11px;
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {
