@@ -932,7 +932,8 @@
                     if (roundNum) {
                         const t = roundThru ?? 0;
                         holesPlayed = (roundNum - 1) * 18 + t;
-                        if (t === 18 || t === 0) thruDisplay = `R${roundNum} F`;
+                        if (t === 18) thruDisplay = `R${roundNum} F`;
+                        else if (t === 0) thruDisplay = `R${roundNum} Not Started`;
                         else thruDisplay = `R${roundNum} Thru ${t}`;
                     }
                     if (playerStatus === 'CUT') thruDisplay = 'CUT';

@@ -718,7 +718,8 @@
                     if (c.status?.period) {
                         const round = c.status.period;
                         const thruHoles = c.status.thru;
-                        if (thruHoles === 18 || thruHoles === 0) thruDisplay = `R${round} F`;
+                        if (thruHoles === 18) thruDisplay = `R${round} F`;
+                        else if (thruHoles === 0) thruDisplay = `R${round} Not Started`;
                         else if (thruHoles) thruDisplay = `R${round} Thru ${thruHoles}`;
                         else thruDisplay = `R${round}`;
                     }
