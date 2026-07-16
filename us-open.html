@@ -639,6 +639,39 @@
             .golfer-prob { font-size: 0.6rem; }
             .golfer-thru { font-size: 0.55rem; }
         }
+        /* === MAJOR POOL NAVIGATION === */
+        .major-nav {
+            min-height: 42px;
+            padding: 7px 16px;
+            background: var(--cream-dark);
+            border-bottom: 1px solid rgba(18, 53, 91, 0.14);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            font-size: 0.7rem;
+            letter-spacing: 0.7px;
+            text-transform: uppercase;
+        }
+
+        .major-nav-label { color: var(--text-muted); font-weight: 600; margin-right: 2px; }
+        .major-nav a, .major-nav-current {
+            color: var(--text-muted);
+            text-decoration: none;
+            padding: 5px 9px;
+            border-radius: 999px;
+            font-weight: 600;
+        }
+        .major-nav a:hover { color: var(--pga-navy); background: rgba(255,255,255,0.55); }
+        .major-nav-current { opacity: 0.7; }
+        .major-nav .featured {
+            color: #ead9a6;
+            background: #102b3f;
+            box-shadow: 0 2px 7px rgba(5,23,34,0.2);
+        }
+        .major-nav .featured:hover { color: #fff2c9; background: #0a2133; }
+
     </style>
 </head>
 <body>
@@ -681,6 +714,13 @@
             <span id="statusText">Loading leaderboard...</span>
         </div>
     </div>
+
+    <nav class="major-nav" aria-label="Major pool archive">
+        <span class="major-nav-label">Major Pools</span>
+        <a href="index.html">Masters</a>
+        <span class="major-nav-current" aria-current="page">U.S. Open 2026</span>
+        <a class="featured" href="british-open.html">The Open &bull; Live</a>
+    </nav>
 
     <div class="container">
         <div class="tab-bar">
