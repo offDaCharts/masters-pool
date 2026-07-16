@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "api/odds.js": {
+      "runtime": "@vercel/node@5.3.24"
+    }
+  }
+}
