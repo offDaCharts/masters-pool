@@ -1,0 +1,269 @@
+.player-scorecard-trigger {
+    appearance: none;
+    border: 0;
+    background: none;
+    padding: 0;
+    margin: 0;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-underline-offset: 3px;
+    transition: color 0.18s ease, text-decoration-color 0.18s ease;
+}
+
+.player-scorecard-trigger:hover {
+    text-decoration-color: currentColor;
+}
+
+.player-scorecard-trigger:focus-visible {
+    outline: 2px solid #b79a5b;
+    outline-offset: 3px;
+    border-radius: 2px;
+}
+
+.field-player-button {
+    max-width: 100%;
+    font-weight: 600;
+}
+
+body.scorecard-open {
+    overflow: hidden;
+}
+
+.scorecard-modal[hidden] {
+    display: none;
+}
+
+.scorecard-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: grid;
+    place-items: center;
+    padding: 20px;
+}
+
+.scorecard-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(3, 14, 21, 0.76);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+}
+
+.scorecard-dialog {
+    position: relative;
+    width: min(920px, 100%);
+    max-height: min(88vh, 820px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    background: #f4f0e6;
+    color: #172932;
+    border: 1px solid rgba(183, 154, 91, 0.55);
+    border-radius: 16px;
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+}
+
+.scorecard-header {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+    padding: 22px 24px 18px;
+    color: #fff;
+    background:
+        radial-gradient(ellipse at 85% 0%, rgba(183,154,91,0.2), transparent 55%),
+        #102b3f;
+    border-bottom: 3px solid #b79a5b;
+}
+
+.scorecard-eyebrow {
+    margin-bottom: 5px;
+    color: #ead9a6;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+}
+
+.scorecard-title {
+    margin: 0;
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: clamp(1.55rem, 4vw, 2.2rem);
+    line-height: 1.05;
+}
+
+.scorecard-subtitle {
+    margin-top: 7px;
+    color: rgba(255,255,255,0.68);
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+}
+
+.scorecard-close {
+    width: 36px;
+    height: 36px;
+    flex: 0 0 auto;
+    border: 1px solid rgba(255,255,255,0.26);
+    border-radius: 50%;
+    color: #fff;
+    background: rgba(255,255,255,0.08);
+    font-size: 1.45rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.scorecard-close:hover,
+.scorecard-close:focus-visible {
+    background: rgba(255,255,255,0.17);
+    outline: none;
+}
+
+.scorecard-content {
+    padding: 22px 24px 26px;
+}
+
+.scorecard-overview {
+    display: flex;
+    align-items: stretch;
+    gap: 10px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+}
+
+.scorecard-overall,
+.scorecard-round-chip {
+    min-width: 88px;
+    padding: 10px 13px;
+    border: 1px solid rgba(16,43,63,0.12);
+    border-radius: 10px;
+    background: rgba(255,255,255,0.62);
+}
+
+.scorecard-overall {
+    background: #102b3f;
+    color: #fff;
+}
+
+.scorecard-chip-label {
+    display: block;
+    margin-bottom: 3px;
+    color: #64747c;
+    font-size: 0.58rem;
+    font-weight: 700;
+    letter-spacing: 0.9px;
+    text-transform: uppercase;
+}
+
+.scorecard-overall .scorecard-chip-label { color: rgba(255,255,255,0.6); }
+.scorecard-chip-score { font-size: 1.05rem; font-weight: 800; }
+.scorecard-chip-detail { margin-left: 4px; color: #64747c; font-size: 0.68rem; }
+
+.scorecard-nine + .scorecard-nine {
+    margin-top: 18px;
+}
+
+.scorecard-nine-title {
+    margin: 0 0 7px;
+    color: #64747c;
+    font-size: 0.66rem;
+    font-weight: 800;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+}
+
+.scorecard-table-wrap {
+    overflow-x: auto;
+    border: 1px solid rgba(16,43,63,0.13);
+    border-radius: 10px;
+    background: rgba(255,255,255,0.58);
+}
+
+.scorecard-table {
+    width: 100%;
+    min-width: 610px;
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-size: 0.75rem;
+}
+
+.scorecard-table th,
+.scorecard-table td {
+    height: 39px;
+    padding: 4px;
+    border-right: 1px solid rgba(16,43,63,0.08);
+    border-bottom: 1px solid rgba(16,43,63,0.08);
+    text-align: center;
+}
+
+.scorecard-table tr:last-child th,
+.scorecard-table tr:last-child td { border-bottom: 0; }
+.scorecard-table th:last-child,
+.scorecard-table td:last-child { border-right: 0; }
+.scorecard-table thead th { color: #fff; background: #102b3f; font-size: 0.65rem; }
+.scorecard-table .row-label { width: 54px; font-weight: 800; }
+.scorecard-table .total-column { width: 48px; font-weight: 800; background: rgba(183,154,91,0.13); }
+.scorecard-table .par-row { color: #64747c; background: #e4dbc9; font-size: 0.66rem; }
+
+.score-mark {
+    display: inline-grid;
+    place-items: center;
+    width: 27px;
+    height: 27px;
+    font-weight: 800;
+}
+
+.score-mark.eagle { border: 3px double #2c6e49; border-radius: 50%; color: #20563a; }
+.score-mark.birdie { border: 2px solid #2c6e49; border-radius: 50%; color: #20563a; }
+.score-mark.bogey { border: 2px solid #a6464f; color: #8f303a; }
+.score-mark.double { border: 3px double #a6464f; color: #8f303a; }
+
+.scorecard-empty {
+    margin: 2px 0 18px;
+    padding: 14px 16px;
+    border-radius: 10px;
+    color: #64747c;
+    background: rgba(183,154,91,0.13);
+    font-size: 0.8rem;
+}
+
+.scorecard-legend {
+    display: flex;
+    justify-content: flex-end;
+    gap: 13px;
+    margin-top: 13px;
+    color: #64747c;
+    font-size: 0.62rem;
+    flex-wrap: wrap;
+}
+
+.scorecard-legend span::before {
+    content: '';
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    margin-right: 5px;
+    vertical-align: -1px;
+}
+
+.scorecard-legend .under::before { border: 2px solid #2c6e49; border-radius: 50%; }
+.scorecard-legend .over::before { border: 2px solid #a6464f; }
+
+@media (max-width: 640px) {
+    .scorecard-modal { padding: 10px; align-items: end; }
+    .scorecard-dialog { width: 100%; max-height: 92vh; border-radius: 15px 15px 8px 8px; }
+    .scorecard-header { padding: 18px 17px 15px; }
+    .scorecard-content { padding: 17px 14px 20px; }
+    .scorecard-overview { gap: 7px; }
+    .scorecard-overall, .scorecard-round-chip { min-width: 78px; padding: 8px 10px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .player-scorecard-trigger { transition: none; }
+}

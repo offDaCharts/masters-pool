@@ -7,6 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="scorecard-modal.css" rel="stylesheet">
     <style>
         :root {
             --open-navy: #102b3f;
@@ -747,6 +748,7 @@
         Golf&rsquo;s original championship <span class="accent"></span> Auto-updates every 60s
     </div>
 
+    <script src="scorecard-modal.js"></script>
     <script>
         const POOL = [
             { owner: "Simon",  picks: ["Rory McIlroy", "Alex Fitzpatrick"] },
@@ -793,6 +795,13 @@
 
         let currentTab = 'individual';
         let lastData = null;
+
+        PlayerScorecard.configure({
+            eventName: 'The 154th Open',
+            courseName: 'Royal Birkdale Golf Club',
+            coursePars: [4,4,4,3,4,4,3,4,4,4,4,3,4,5,3,4,5,4],
+            getGolfer: name => lastData?.golfers.find(g => matchGolfer(g.name, name)) || null,
+        });
 
         function switchTab(tab) {
             currentTab = tab;
@@ -939,6 +948,7 @@
                         roundThru,
                         roundNum,
                         r1Score,
+                        rounds: PlayerScorecard.roundsFromCompetitor(c),
                         sortOrder: c.sortOrder || 999,
                     });
                 }
@@ -1349,7 +1359,7 @@
             }
 
             return `<div class="golfer-tag ${g.status === 'CUT' ? 'golfer-tag-cut' : ''} ${g.status === 'WD' ? 'golfer-tag-wd' : ''}">
-                <span class="golfer-name ${isBest ? 'best' : ''}">${g.pickName}</span>
+                ${PlayerScorecard.button(g.pickName, g.pickName, `golfer-name ${isBest ? 'best' : ''}`)}
                 <span class="golfer-tag-score ${sClass}">${scoreText}</span>
                 ${thruBadge}
                 ${probBadge}
@@ -1502,7 +1512,7 @@
                 if (out) thruText = '';
                 return `<div class="field-row ${out ? 'field-out' : ''} ${isCut ? 'field-cut' : ''} ${isPoolPick ? 'field-pool' : ''}">
                     <div class="field-pos">${pos}</div>
-                    <div class="field-name">${g.name}${isPoolPick ? '<span class="field-pool-mark" title="In the pool">\u2605</span>' : ''}</div>
+                    <div class="field-name">${PlayerScorecard.button(g.name, g.name, 'field-player-button')}${isPoolPick ? '<span class="field-pool-mark" title="In the pool">\u2605</span>' : ''}</div>
                     <div class="field-thru">${thruText}</div>
                     <div class="field-score ${sClass}">${scoreText}</div>
                 </div>`;

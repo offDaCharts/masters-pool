@@ -7,6 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="scorecard-modal.css" rel="stylesheet">
     <style>
         :root {
             --augusta-green: #006747;
@@ -585,6 +586,7 @@
         A tradition unlike any other <span class="azalea"></span> Auto-updates every 60s
     </div>
 
+    <script src="scorecard-modal.js"></script>
     <script>
         const POOL = [
             { owner: "Kasey",  picks: ["Scottie Scheffler", "Min Woo Lee"] },
@@ -618,6 +620,13 @@
 
         let currentTab = 'individual';
         let lastData = null;
+
+        PlayerScorecard.configure({
+            eventName: 'Masters Tournament 2026',
+            courseName: 'Augusta National Golf Club',
+            coursePars: [4,5,4,3,4,3,4,5,4,4,4,3,5,4,5,3,4,4],
+            getGolfer: name => lastData?.golfers.find(g => matchGolfer(g.name, name)) || null,
+        });
 
         function switchTab(tab) {
             currentTab = tab;
@@ -662,16 +671,13 @@
         }
 
         async function fetchLeaderboard() {
-            const resp = await fetch('https://site.api.espn.com/apis/site/v2/sports/golf/pga/scoreboard');
+            const resp = await fetch('https://site.api.espn.com/apis/site/v2/sports/golf/pga/scoreboard?dates=20260409');
             if (!resp.ok) throw new Error('ESPN API error');
             const data = await resp.json();
 
             if (data.events && data.events.length > 0) {
-                let mastersEvent = data.events.find(e =>
-                    e.name && (e.name.toLowerCase().includes('masters') ||
-                    e.name.toLowerCase().includes('augusta'))
-                );
-                if (!mastersEvent) mastersEvent = data.events[0];
+                const mastersEvent = data.events.find(e => String(e.id) === '401811941');
+                if (!mastersEvent) throw new Error('Masters event is not available');
                 return parseESPNEvent(mastersEvent);
             }
             throw new Error('No event data');
@@ -722,6 +728,7 @@
                     golfers.push({
                         name, score: totalScore !== null ? totalScore : 999,
                         status: playerStatus, thru: thruDisplay,
+                        rounds: PlayerScorecard.roundsFromCompetitor(c),
                         sortOrder: c.sortOrder || 999,
                     });
                 }
@@ -737,7 +744,7 @@
             if (g.status === 'WD') badge = '<span class="golfer-badge badge-wd">WD</span>';
 
             return `<div class="golfer-tag">
-                <span class="golfer-name ${isBest ? 'best' : ''}">${g.pickName}</span>
+                ${PlayerScorecard.button(g.pickName, g.pickName, `golfer-name ${isBest ? 'best' : ''}`)}
                 <span class="golfer-tag-score ${sClass}">${scoreText}</span>
                 ${badge}
             </div>`;
