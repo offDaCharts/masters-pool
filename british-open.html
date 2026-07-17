@@ -625,6 +625,17 @@
             opacity: 0.6;
         }
 
+        .footer a {
+            color: var(--open-gold-deep);
+            font-weight: 700;
+            text-underline-offset: 2px;
+        }
+
+        .footer-source {
+            display: block;
+            margin-top: 7px;
+        }
+
         /* === RESPONSIVE === */
         @media (max-width: 600px) {
             .header { padding: 28px 16px 24px; }
@@ -745,7 +756,8 @@
     </div>
 
     <div class="footer">
-        Golf&rsquo;s original championship <span class="accent"></span> Auto-updates every 60s
+        Golf&rsquo;s original championship <span class="accent"></span> Auto-updates every 30s
+        <span class="footer-source">Live leaderboard and full-field data from <a href="https://www.espn.com/golf/leaderboard/_/tournamentId/401811957" target="_blank" rel="noopener noreferrer">ESPN</a></span>
     </div>
 
     <script src="scorecard-modal.js?v=20260717.1"></script>
@@ -763,6 +775,8 @@
             { owner: "Luke",   picks: ["Tyrrell Hatton", "Viktor Hovland"] },
             { owner: "Tim",    picks: ["Tom Kim", "Collin Morikawa"] },
         ];
+        const SCOREBOARD_ENDPOINT = 'https://site.api.espn.com/apis/site/v2/sports/golf/pga/scoreboard';
+        const LEADERBOARD_REFRESH_MS = 30000;
 
         const NAME_ALIASES = {
             "Scottie Scheffler": ["scheffler"],
@@ -855,7 +869,9 @@
         }
 
         async function fetchLeaderboard() {
-            const resp = await fetch('https://site.api.espn.com/apis/site/v2/sports/golf/pga/scoreboard');
+            const url = new URL(SCOREBOARD_ENDPOINT);
+            url.searchParams.set('_', String(Date.now()));
+            const resp = await fetch(url, { cache: 'no-store' });
             if (!resp.ok) throw new Error('ESPN API error');
             const data = await resp.json();
 
@@ -1593,7 +1609,7 @@
 
                 statusBar.className = 'status-bar';
                 const now = new Date();
-                statusText.textContent = `Live \u2022 Updated ${now.toLocaleTimeString()} \u2022 Auto-refreshes every 60s`;
+                statusText.textContent = `Live \u2022 Updated ${now.toLocaleTimeString()} \u2022 Auto-refreshes every ${LEADERBOARD_REFRESH_MS / 1000}s`;
             } catch (e) {
                 console.error('Update error:', e);
                 if (!lastData) {
@@ -1602,15 +1618,15 @@
                     errorEl.innerHTML = `
                         <p><strong>Unable to fetch leaderboard data.</strong></p>
                         <p>The tournament may not have started yet, or ESPN's API may be temporarily unavailable.</p>
-                        <p style="margin-top:8px;font-size:0.75rem;">The page will keep trying every 60 seconds.</p>`;
+                        <p style="margin-top:8px;font-size:0.75rem;">The page will keep trying every ${LEADERBOARD_REFRESH_MS / 1000} seconds.</p>`;
                 }
                 statusBar.className = 'status-bar error';
-                statusText.textContent = `Connection issue \u2022 Retrying in 60s...`;
+                statusText.textContent = `Connection issue \u2022 Retrying in ${LEADERBOARD_REFRESH_MS / 1000}s...`;
             }
         }
 
         update();
-        setInterval(update, 60000);
+        setInterval(update, LEADERBOARD_REFRESH_MS);
     </script>
 </body>
 </html>
