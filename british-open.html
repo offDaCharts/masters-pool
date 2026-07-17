@@ -1034,8 +1034,6 @@
         const ODDS_ENDPOINT = "https://british-open-odds-proxy.vercel.app/api/odds";
         const ODDS_LS_KEY = "british_open_odds_v1";
         const ODDS_CLIENT_CACHE_MS = 14 * 60 * 1000;  // slightly under proxy's play-hours TTL
-        const FALLBACK_ODDS_SOURCE = "DraftKings pre-tournament snapshot";
-        const FALLBACK_ODDS_FETCHED_AT = "2026-07-12T12:00:00-04:00";
         const FALLBACK_AMERICAN_ODDS = [
             ["Scottie Scheffler", 590],
             ["Rory McIlroy", 760],
@@ -1073,8 +1071,6 @@
 
         function fallbackOddsPayload() {
             return {
-                fetchedAt: FALLBACK_ODDS_FETCHED_AT,
-                source: FALLBACK_ODDS_SOURCE,
                 bookmakerCount: 1,
                 golfers: FALLBACK_AMERICAN_ODDS.map(([name, line]) => ({
                     name,
@@ -1623,17 +1619,11 @@
                         probs = computeProbabilities(matchedTeams, oddsMap, fieldRankMap, cutState);
 
                         oddsStatusEl.classList.remove('hidden', 'warning');
-                        const fetchedAt = oddsPayload.fetchedAt ? new Date(oddsPayload.fetchedAt) : null;
                         const missing = POOL.reduce((acc, e) =>
                             acc + e.picks.filter(p => !oddsMap.has(p)).length, 0);
-                        const note = oddsPayload.source
-                            ? `${oddsPayload.source} \u2014 snapshot ${fetchedAt ? fetchedAt.toLocaleString() : 'pre-tournament'}`
-                            : fetchedAt
-                                ? `Odds via The Odds API \u2014 last refresh ${fetchedAt.toLocaleTimeString()}`
-                                : 'Odds via The Odds API';
                         oddsStatusEl.textContent = missing > 0
-                            ? `${note} (${missing} golfer(s) not on board \u2014 using longshot baseline). Displayed odds are pool projections, not tournament outright odds.`
-                            : `${note}. Displayed odds are pool projections, not tournament outright odds.`;
+                            ? `Pool projections combine live scores with player-strength estimates. ${missing} golfer(s) use a longshot baseline. These are not tournament outright odds.`
+                            : 'Pool projections combine live scores with player-strength estimates. These are not tournament outright odds.';
                     }
                 } else {
                     oddsStatusEl.classList.add('hidden');
