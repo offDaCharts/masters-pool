@@ -777,6 +777,7 @@
         ];
         const SCOREBOARD_ENDPOINT = 'https://site.api.espn.com/apis/site/v2/sports/golf/pga/scoreboard';
         const LEADERBOARD_REFRESH_MS = 30000;
+        const OPEN_CUT_POSITION = 70;
 
         const NAME_ALIASES = {
             "Scottie Scheffler": ["scheffler"],
@@ -956,7 +957,12 @@
                     if (playerStatus === 'WD') thruDisplay = 'WD';
 
                     // Per-round scores from linescores (signed to-par per round).
-                    const r1Score = parseScoreFromText(c.linescores?.[0]?.displayValue);
+                    const round1 = c.linescores?.find(line => line.period === 1);
+                    const round2 = c.linescores?.find(line => line.period === 2);
+                    const r1Score = parseScoreFromText(round1?.displayValue);
+                    const r2Score = parseScoreFromText(round2?.displayValue);
+                    const r2Holes = Array.isArray(round2?.linescores) ? round2.linescores.length : 0;
+                    const r2Total = r1Score !== null && r2Score !== null ? r1Score + r2Score : null;
 
                     golfers.push({
                         name, score: totalScore !== null ? totalScore : 999,
@@ -965,36 +971,61 @@
                         roundThru,
                         roundNum,
                         r1Score,
+                        r2Score,
+                        r2Holes,
+                        r2Total,
                         rounds: PlayerScorecard.roundsFromCompetitor(c),
                         sortOrder: c.sortOrder || 999,
                     });
                 }
             }
-            return { golfers, eventName, roundInfo, currentRound: eventCurrentRound };
-        }
 
-        // Projected cut line: 65th-lowest R2-end score, plus ties.
-        // Mid-R2 golfers' R2-end is projected by pace from R1; pre-R2 golfers are skipped.
-        function computeProjectedCut(golfers) {
-            const r2Ends = [];
-            let finished = 0;
-            for (const g of golfers) {
-                if (g.status === 'WD') continue;
-                if (g.score === 999) continue;
-                if (g.holesPlayed >= 36) {
-                    r2Ends.push(g.score);
-                    finished++;
-                } else if (g.holesPlayed > 18 && g.r1Score !== null) {
-                    const holesIn = g.holesPlayed - 18;
-                    const r2Partial = g.score - g.r1Score;
-                    const projR2 = (r2Partial / holesIn) * 18;
-                    r2Ends.push(g.r1Score + projR2);
+            const round2Field = golfers.filter(g => g.status !== 'WD');
+            const round2Complete = eventCurrentRound > 2 || (
+                round2Field.length > 0 && round2Field.every(g => g.r2Holes >= 18)
+            );
+
+            // ESPN may not mark missed-cut players until the Round 3 board appears.
+            // Finalize them as soon as every remaining player has completed Round 2.
+            if (round2Complete) {
+                const finalCut = computeCutLine(golfers, { finalized: true });
+                if (finalCut) {
+                    for (const golfer of golfers) {
+                        if (golfer.status === 'active'
+                            && golfer.r2Total !== null
+                            && golfer.r2Total > finalCut.cutLine) {
+                            golfer.status = 'CUT';
+                            golfer.thru = 'CUT';
+                        }
+                    }
                 }
             }
-            if (r2Ends.length < 65) return null;
-            r2Ends.sort((a, b) => a - b);
-            const cut = Math.round(r2Ends[64]);
-            return { cutLine: cut, finished, total: golfers.length };
+
+            return {
+                golfers,
+                eventName,
+                roundInfo,
+                currentRound: eventCurrentRound,
+                round2Complete,
+            };
+        }
+
+        // The Open advances the 70 lowest 36-hole scores and ties. While R2 is
+        // active, use each player's current leaderboard score, matching ESPN's
+        // live projected line. Once R2 closes, use only posted two-round totals.
+        function computeCutLine(golfers, { finalized = false } = {}) {
+            const field = golfers.filter(g => g.status !== 'WD');
+            const scores = field
+                .map(g => finalized ? g.r2Total : g.score)
+                .filter(score => Number.isFinite(score) && score !== 999)
+                .sort((a, b) => a - b);
+            if (scores.length < OPEN_CUT_POSITION) return null;
+            return {
+                cutLine: scores[OPEN_CUT_POSITION - 1],
+                finished: field.filter(g => g.r2Holes >= 18).length,
+                total: field.length,
+                finalized,
+            };
         }
 
         // === ODDS + PROBABILITY ===
@@ -1176,7 +1207,7 @@
             return (line >= 0 ? '+' : '') + line;
         }
 
-        function computeProbabilities(matchedTeams, oddsMap, fieldRankMap) {
+        function computeProbabilities(matchedTeams, oddsMap, fieldRankMap, cutState = null) {
             // Flatten to the 20 pool golfers with current score state + implied prob + field rank.
             const golferRows = [];
             for (const t of matchedTeams) {
@@ -1244,8 +1275,7 @@
             }
             for (const r of golferRows) golferWinCount.set(r.pickName, 0);
 
-            // Determine if cut has effectively passed: if any golfer has played >= 36 holes.
-            const cutResolved = golferRows.some(r => r.holesPlayedFrac >= 36 / 72);
+            const cutResolved = Boolean(cutState?.finalized);
 
             for (let sim = 0; sim < SIM_N; sim++) {
                 // Sample final scores.
@@ -1287,9 +1317,9 @@
 
                 // Determine cut line for the team prize.
                 // We *don't* simulate the field — the pool is favorites-skewed, so using its
-                // median as a cut proxy is artificially low and incorrectly eliminates teams
-                // that would survive a real Open Championship cut. Use the static projection.
-                const cutLine = PRE_CUT_LINE;
+                // median as a cut proxy is artificially low. Use the live field-wide line when
+                // available, with the pre-tournament estimate only as a fallback.
+                const cutLine = cutState?.cutLine ?? PRE_CUT_LINE;
 
                 // Award team prize among eligible teams.
                 let bestTeamScore = Infinity;
@@ -1385,19 +1415,22 @@
         }
 
         function renderStandings(data, probs) {
-            const { golfers, eventName, roundInfo, currentRound } = data;
+            const { golfers, eventName, roundInfo, currentRound, round2Complete } = data;
             lastData = data;
 
             document.getElementById('roundInfo').textContent =
                 `${eventName}${roundInfo ? ' \u2014 ' + roundInfo : ''}`;
 
-            // Cut line — only meaningful during R2 (Friday).
+            // Match ESPN's current top-70-and-ties cut line, then lock it once R2 ends.
             const cutEl = document.getElementById('cutLineInfo');
-            if (currentRound === 2) {
-                const cut = computeProjectedCut(golfers);
+            if (currentRound >= 2 || round2Complete) {
+                const cut = computeCutLine(golfers, { finalized: round2Complete });
                 if (cut) {
-                    const label = cut.finished >= cut.total - 5 ? 'Cut line' : 'Projected cut';
-                    cutEl.textContent = `${label}: ${formatScore(cut.cutLine)} (${cut.finished} of ${cut.total} through R2)`;
+                    const label = cut.finalized ? 'Cut line' : 'Projected cut';
+                    const detail = cut.finalized
+                        ? 'Final after R2'
+                        : `${cut.finished} of ${cut.total} through R2`;
+                    cutEl.textContent = `${label}: ${formatScore(cut.cutLine)} (${detail})`;
                     cutEl.classList.remove('hidden');
                 } else {
                     cutEl.classList.add('hidden');
@@ -1584,7 +1617,10 @@
                             });
                             return { owner: entry.owner, golfers: matched };
                         });
-                        probs = computeProbabilities(matchedTeams, oddsMap, fieldRankMap);
+                        const cutState = (data.currentRound >= 2 || data.round2Complete)
+                            ? computeCutLine(data.golfers, { finalized: data.round2Complete })
+                            : null;
+                        probs = computeProbabilities(matchedTeams, oddsMap, fieldRankMap, cutState);
 
                         oddsStatusEl.classList.remove('hidden', 'warning');
                         const fetchedAt = oddsPayload.fetchedAt ? new Date(oddsPayload.fetchedAt) : null;
