@@ -164,6 +164,14 @@ body.scorecard-open {
 .scorecard-overall .scorecard-chip-label { color: rgba(255,255,255,0.6); }
 .scorecard-chip-score { font-size: 1.05rem; font-weight: 800; }
 .scorecard-chip-detail { margin-left: 4px; color: #64747c; font-size: 0.68rem; }
+.scorecard-chip-tee-time {
+    display: block;
+    margin-top: 3px;
+    color: #52646d;
+    font-size: 0.58rem;
+    font-weight: 700;
+    line-height: 1.25;
+}
 
 .scorecard-nine + .scorecard-nine {
     margin-top: 18px;

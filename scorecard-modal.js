@@ -32,15 +32,39 @@
         return number > 0 ? `+${number}` : String(number);
     }
 
+    function teeTimeFromRound(round) {
+        const categories = Array.isArray(round?.statistics?.categories)
+            ? round.statistics.categories
+            : [];
+        for (const category of categories) {
+            const stats = Array.isArray(category?.stats) ? category.stats : [];
+            for (const stat of stats) {
+                const value = stat?.displayValue;
+                if (typeof value !== 'string' || !value.includes(':')) continue;
+                const timestamp = Date.parse(value);
+                if (Number.isFinite(timestamp)) return new Date(timestamp).toISOString();
+            }
+        }
+        return null;
+    }
+
+    function formatTeeTime(value) {
+        if (!value) return '';
+        const date = new Date(value);
+        if (!Number.isFinite(date.getTime())) return '';
+        return new Intl.DateTimeFormat(undefined, {
+            hour: 'numeric',
+            minute: '2-digit',
+            timeZoneName: 'short',
+        }).format(date);
+    }
+
     function roundsFromCompetitor(competitor) {
         const rounds = Array.isArray(competitor?.linescores) ? competitor.linescores : [];
         return rounds
             .filter(round => Number.isFinite(Number(round?.period)))
-            .map(round => ({
-                number: Number(round.period),
-                strokes: Number.isFinite(Number(round.value)) ? Number(round.value) : null,
-                toPar: parseRelative(round.displayValue),
-                holes: (Array.isArray(round.linescores) ? round.linescores : []).map(hole => {
+            .map(round => {
+                const holes = (Array.isArray(round.linescores) ? round.linescores : []).map(hole => {
                     const strokes = Number.isFinite(Number(hole.value)) ? Number(hole.value) : null;
                     const toPar = parseRelative(hole.scoreType?.displayValue);
                     return {
@@ -49,8 +73,19 @@
                         toPar,
                         par: strokes !== null && toPar !== null ? strokes - toPar : null,
                     };
-                }),
-            }))
+                });
+                const notStarted = holes.length === 0
+                    && (round.displayValue === '-' || Number(round.value) === 0);
+                return {
+                    number: Number(round.period),
+                    strokes: !notStarted && Number.isFinite(Number(round.value))
+                        ? Number(round.value)
+                        : null,
+                    toPar: notStarted ? null : parseRelative(round.displayValue),
+                    holes,
+                    teeTime: notStarted ? teeTimeFromRound(round) : null,
+                };
+            })
             .sort((a, b) => a.number - b.number);
     }
 
@@ -145,7 +180,11 @@
         const chips = rounds.map(round => {
             const strokes = Number.isFinite(round.strokes) ? round.strokes : '—';
             const detail = round.toPar === null ? '' : `<span class="scorecard-chip-detail">${formatRelative(round.toPar)}</span>`;
-            return `<div class="scorecard-round-chip"><span class="scorecard-chip-label">Round ${round.number}</span><span class="scorecard-chip-score">${strokes}</span>${detail}</div>`;
+            const teeTime = formatTeeTime(round.teeTime);
+            const teeTimeHTML = teeTime
+                ? `<span class="scorecard-chip-tee-time">Tee ${escapeHTML(teeTime)}</span>`
+                : '';
+            return `<div class="scorecard-round-chip"><span class="scorecard-chip-label">Round ${round.number}</span><span class="scorecard-chip-score">${strokes}</span>${detail}${teeTimeHTML}</div>`;
         }).join('');
         const empty = rounds.some(round => round.holes.length)
             ? ''
