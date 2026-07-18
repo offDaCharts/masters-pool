@@ -337,6 +337,12 @@
             color: var(--text-muted);
             font-style: italic;
         }
+        .field-thru.field-tee-time {
+            color: #52646d;
+            font-style: normal;
+            font-weight: 700;
+            white-space: nowrap;
+        }
         .field-score {
             text-align: right;
             font-weight: 700;
@@ -760,7 +766,7 @@
         <span class="footer-source">Live leaderboard and full-field data from <a href="https://www.espn.com/golf/leaderboard/_/tournamentId/401811957" target="_blank" rel="noopener noreferrer">ESPN</a></span>
     </div>
 
-    <script src="scorecard-modal.js?v=20260717.1"></script>
+    <script src="scorecard-modal.js?v=20260718.1"></script>
     <script>
         const POOL = [
             { owner: "Simon",  picks: ["Rory McIlroy", "Alex Fitzpatrick"] },
@@ -942,6 +948,7 @@
                         const roundLs = c.linescores.find(l => l.period === roundNum);
                         const subs = roundLs?.linescores;
                         if (Array.isArray(subs)) roundThru = subs.length;
+                        else if (roundLs) roundThru = 0;
                     }
 
                     let thruDisplay = '';
@@ -963,6 +970,9 @@
                     const r2Score = parseScoreFromText(round2?.displayValue);
                     const r2Holes = Array.isArray(round2?.linescores) ? round2.linescores.length : 0;
                     const r2Total = r1Score !== null && r2Score !== null ? r1Score + r2Score : null;
+                    const scorecardRounds = PlayerScorecard.roundsFromCompetitor(c);
+                    const currentRoundTeeTime = scorecardRounds
+                        .find(round => round.number === roundNum)?.teeTime || null;
 
                     golfers.push({
                         name, score: totalScore !== null ? totalScore : 999,
@@ -974,7 +984,8 @@
                         r2Score,
                         r2Holes,
                         r2Total,
-                        rounds: PlayerScorecard.roundsFromCompetitor(c),
+                        currentRoundTeeTime,
+                        rounds: scorecardRounds,
                         sortOrder: c.sortOrder || 999,
                     });
                 }
@@ -1553,13 +1564,28 @@
                 const sClass = g.score === 999 ? '' : scoreClass(g.score);
                 const isPoolPick = [...poolPickSet].some(pick => matchGolfer(g.name, pick));
                 let thruText = g.thru || '';
+                let thruClass = '';
+                let thruTitle = '';
                 if (g.roundThru === 18) thruText = `R${g.roundNum} F`;
                 else if (typeof g.roundThru === 'number' && g.roundThru > 0) thruText = `R${g.roundNum} Thru ${g.roundThru}`;
-                if (out) thruText = '';
+                else if (g.roundThru === 0 && g.currentRoundTeeTime) {
+                    const teeDate = new Date(g.currentRoundTeeTime);
+                    thruText = `Tee ${new Intl.DateTimeFormat(undefined, {
+                        hour: 'numeric',
+                        minute: '2-digit',
+                    }).format(teeDate)}`;
+                    thruTitle = ` title="${PlayerScorecard.formatTeeTime(g.currentRoundTeeTime)}"`;
+                    thruClass = ' field-tee-time';
+                }
+                if (out) {
+                    thruText = '';
+                    thruTitle = '';
+                    thruClass = '';
+                }
                 return `<div class="field-row ${out ? 'field-out' : ''} ${isCut ? 'field-cut' : ''} ${isPoolPick ? 'field-pool' : ''}">
                     <div class="field-pos">${pos}</div>
                     <div class="field-name">${PlayerScorecard.button(g.name, g.name, 'field-player-button')}${isPoolPick ? '<span class="field-pool-mark" title="In the pool">\u2605</span>' : ''}</div>
-                    <div class="field-thru">${thruText}</div>
+                    <div class="field-thru${thruClass}"${thruTitle}>${thruText}</div>
                     <div class="field-score ${sClass}">${scoreText}</div>
                 </div>`;
             }).join('');

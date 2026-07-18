@@ -233,6 +233,7 @@
     window.PlayerScorecard = {
         button,
         configure(options) { config = { ...config, ...options }; },
+        formatTeeTime,
         roundsFromCompetitor,
         open,
         close,
