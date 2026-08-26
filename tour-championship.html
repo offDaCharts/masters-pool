@@ -3,24 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Open Pool 2026</title>
+    <title>FedEx Cup Final Pool 2026</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="scorecard-modal.css?v=20260717.1" rel="stylesheet">
     <style>
         :root {
-            --open-navy: #102b3f;
-            --open-navy-dark: #0a2133;
-            --open-navy-deep: #051722;
-            --open-gold: #b79a5b;
-            --open-gold-bright: #ead9a6;
-            --open-gold-deep: #7b6335;
-            --cream: #f4f0e6;
-            --cream-dark: #e4dbc9;
-            --crimson: #9d3445;
-            --text-dark: #172932;
-            --text-muted: #64747c;
+            --open-navy: #08213c;
+            --open-navy-dark: #04172b;
+            --open-navy-deep: #020c17;
+            --open-gold: #17a8d4;
+            --open-gold-bright: #f4f8fb;
+            --open-gold-deep: #08789f;
+            --cream: #f3f6f7;
+            --cream-dark: #dde6e8;
+            --crimson: #d73b42;
+            --text-dark: #10242d;
+            --text-muted: #60737b;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -34,10 +34,10 @@
 
         /* === HEADER === */
         .header {
-            background: var(--open-navy);
+            background: var(--open-navy) url('assets/east-lake-header.jpg') center 46% / cover no-repeat;
             position: relative;
             overflow: hidden;
-            padding: 40px 20px 32px;
+            padding: 48px 20px 40px;
             text-align: center;
         }
 
@@ -45,10 +45,7 @@
             content: '';
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
-            background:
-                radial-gradient(ellipse at 18% 95%, rgba(74,101,92,0.55) 0%, transparent 58%),
-                radial-gradient(ellipse at 82% 5%, rgba(183,154,91,0.18) 0%, transparent 52%),
-                linear-gradient(180deg, rgba(2,13,20,0.12) 0%, transparent 42%, rgba(2,13,20,0.28) 100%);
+            background: rgba(2, 12, 23, 0.62);
         }
 
         .header-content { position: relative; z-index: 1; }
@@ -109,11 +106,11 @@
         }
 
         .header h1 {
-            font-family: 'Playfair Display', Georgia, serif;
-            font-size: 2.4rem;
-            font-weight: 700;
+            font-family: 'Barlow Condensed', Impact, sans-serif;
+            font-size: 2.8rem;
+            font-weight: 800;
             color: var(--open-gold-bright);
-            letter-spacing: 4px;
+            letter-spacing: 0;
             text-transform: uppercase;
             text-shadow: 0 2px 8px rgba(0,0,0,0.4);
             line-height: 1.1;
@@ -123,7 +120,7 @@
             display: block;
             font-size: 0.85rem;
             font-weight: 400;
-            letter-spacing: 6px;
+            letter-spacing: 0;
             color: rgba(234,217,166,0.88);
             margin-top: 4px;
         }
@@ -141,7 +138,7 @@
             color: rgba(255,255,255,0.75);
             font-size: 0.85rem;
             font-weight: 300;
-            letter-spacing: 3px;
+            letter-spacing: 0;
             text-transform: uppercase;
         }
 
@@ -688,22 +685,30 @@
             background: rgba(183,154,91,0.15);
         }
 
+        /* TOUR Championship identity: tighter, brighter and built for a season finale. */
+        * { letter-spacing: 0 !important; }
+        .header-content { max-width: 760px; margin: 0 auto; }
+        .header h1 { text-shadow: 0 3px 18px rgba(0,0,0,0.72); }
+        .header h1 .small { margin-top: 6px; color: rgba(255,255,255,0.88); }
+        .header .divider { width: 84px; height: 4px; background: #17a8d4; opacity: 1; }
+        .header .subtitle { font-weight: 600; color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,0.8); }
+        .prizes-bar { border-bottom-color: #17a8d4; }
+        .prize-icon.gold { background: #17a8d4; color: #04172b; }
+        .prize-icon.silver { background: #b8d537; color: #04172b; }
+        .tab.active { border-bottom-color: #17a8d4; color: #08213c; }
+        .standing-card.leader { border-color: #17a8d4; box-shadow: 0 3px 12px rgba(8,120,159,0.16); }
+        .standing-card.leader .card-rank { background: #17a8d4; color: #04172b; }
+        .major-nav-current { color: #08213c; background: rgba(23,168,212,0.15); }
+
     </style>
 </head>
 <body>
 
     <div class="header">
         <div class="header-content">
-            <div class="trophy">
-                <span class="trophy-handle-l"></span>
-                <span class="trophy-handle-r"></span>
-                <span class="trophy-cup"></span>
-                <span class="trophy-stem"></span>
-                <span class="trophy-base"></span>
-            </div>
-            <h1>The Open <span class="small">Pool &mdash; 2026</span></h1>
+            <h1>FedEx Cup Final <span class="small">Tour Championship Pool &mdash; 2026</span></h1>
             <div class="divider"></div>
-            <div class="subtitle">Royal Birkdale &bull; July 16&ndash;19, 2026 &bull; $25 Buy-In</div>
+            <div class="subtitle">East Lake Golf Club &bull; August 27&ndash;30, 2026 &bull; $25 Buy-In</div>
         </div>
     </div>
 
@@ -711,7 +716,7 @@
         <div class="prize-item">
             <div class="prize-icon gold">1st</div>
             <div class="prize-info">
-                <div class="prize-amount">$175</div>
+                <div class="prize-amount">$150</div>
                 <div class="prize-label">Best Individual Golfer</div>
             </div>
         </div>
@@ -731,17 +736,17 @@
         </div>
     </div>
 
-    <nav class="major-nav" aria-label="Major pool archive">
-        <span class="major-nav-label">Major Pools</span>
+    <nav class="major-nav" aria-label="Golf pool archive">
+        <span class="major-nav-label">2026 Pools</span>
         <a href="index.html">Masters</a>
         <a href="us-open.html">U.S. Open</a>
-        <span class="major-nav-current" aria-current="page">The Open 2026</span>
-        <a class="featured" href="tour-championship.html">FedEx Cup Final &bull; Live</a>
+        <a href="british-open.html">The Open</a>
+        <span class="major-nav-current" aria-current="page">FedEx Cup Final</span>
     </nav>
 
     <div class="container">
         <div class="tab-bar">
-            <div class="tab active" data-tab="individual" onclick="switchTab('individual')">Best Golfer &mdash; $175</div>
+            <div class="tab active" data-tab="individual" onclick="switchTab('individual')">Best Golfer &mdash; $150</div>
             <div class="tab" data-tab="team" onclick="switchTab('team')">Team Score &mdash; $100</div>
             <div class="tab" data-tab="field" onclick="switchTab('field')">Full Field</div>
         </div>
@@ -752,7 +757,7 @@
 
         <div id="loading" class="loading-state">
             <div class="loading-spinner"></div>
-            <div class="loading-text">Fetching live scores from Royal Birkdale...</div>
+            <div class="loading-text">Fetching live scores from East Lake...</div>
         </div>
 
         <div id="error" class="error-state hidden"></div>
@@ -763,28 +768,26 @@
     </div>
 
     <div class="footer">
-        Golf&rsquo;s original championship <span class="accent"></span> Auto-updates every 30s
-        <span class="footer-source">Live leaderboard and full-field data from <a href="https://www.espn.com/golf/leaderboard/_/tournamentId/401811957" target="_blank" rel="noopener noreferrer">ESPN</a></span>
+        Thirty players. One final. <span class="accent"></span> Auto-updates every 30s
+        <span class="footer-source">Live leaderboard and full-field data from <a href="https://www.espn.com/golf/leaderboard/_/tournamentId/401811964" target="_blank" rel="noopener noreferrer">ESPN</a></span>
     </div>
 
     <script src="scorecard-modal.js?v=20260718.1"></script>
     <script>
         const POOL = [
-            { owner: "Simon",  picks: ["Rory McIlroy", "Alex Fitzpatrick"] },
-            { owner: "Quin",   picks: ["Scottie Scheffler", "Bryson DeChambeau"] },
-            { owner: "Davis",  picks: ["Tommy Fleetwood", "Shane Lowry"] },
-            { owner: "Anton",  picks: ["Matt Fitzpatrick", "Akshay Bhatia"] },
-            { owner: "Robbie", picks: ["Xander Schauffele", "Cameron Young"] },
-            { owner: "Kasey",  picks: ["Jon Rahm", "Ludvig Åberg"] },
-            { owner: "Brian",  picks: ["Robert MacIntyre", "Justin Rose"] },
-            { owner: "Nick",   picks: ["Wyndham Clark", "Chris Gotterup"] },
-            { owner: "Conor",  picks: ["Sam Burns", "Russell Henley"] },
-            { owner: "Luke",   picks: ["Tyrrell Hatton", "Viktor Hovland"] },
-            { owner: "Tim",    picks: ["Tom Kim", "Collin Morikawa"] },
+            { owner: "Kasey",  picks: ["Scottie Scheffler", "J.J. Spaun", "Alex Fitzpatrick"] },
+            { owner: "Brian",  picks: ["Rory McIlroy", "Justin Rose", "Ryan Fox"] },
+            { owner: "Nick",   picks: ["Wyndham Clark", "Russell Henley", "Kristoffer Reitan"] },
+            { owner: "Davis",  picks: ["Xander Schauffele", "Ryan Gerard", "Jacob Bridgeman"] },
+            { owner: "Conor",  picks: ["Sam Burns", "Chris Gotterup", "Akshay Bhatia"] },
+            { owner: "Luke",   picks: ["Cameron Young", "Si Woo Kim", "Min Woo Lee"] },
+            { owner: "Robbie", picks: ["Matt Fitzpatrick", "Collin Morikawa", "Alex Smalley"] },
+            { owner: "Quin",   picks: ["Ludvig Åberg", "Tommy Fleetwood", "Adam Scott"] },
+            { owner: "Tim",    picks: ["Patrick Cantlay", "Viktor Hovland", "Robert MacIntyre"] },
+            { owner: "Anton",  picks: ["Gary Woodland", "Hideki Matsuyama", "Tom Kim"] },
         ];
         const SCOREBOARD_ENDPOINT = 'https://site.api.espn.com/apis/site/v2/sports/golf/pga/scoreboard';
         const LEADERBOARD_REFRESH_MS = 30000;
-        const OPEN_CUT_POSITION = 70;
 
         const NAME_ALIASES = {
             "Scottie Scheffler": ["scheffler"],
@@ -819,9 +822,9 @@
         let lastData = null;
 
         PlayerScorecard.configure({
-            eventName: 'The 154th Open',
-            courseName: 'Royal Birkdale Golf Club',
-            coursePars: [4,4,4,3,4,4,3,4,4,4,4,3,4,5,3,4,5,4],
+            eventName: 'TOUR Championship',
+            courseName: 'East Lake Golf Club',
+            coursePars: [4,3,4,4,4,5,4,4,3,4,3,4,4,4,3,4,4,5],
             getGolfer: name => lastData?.golfers.find(g => matchGolfer(g.name, name)) || null,
         });
 
@@ -885,12 +888,10 @@
 
             if (data.events && data.events.length > 0) {
                 let openEvent = data.events.find(e =>
-                    String(e.id) === '401811957' ||
-                    (e.name && (e.name.toLowerCase() === 'the open' ||
-                    e.name.toLowerCase().includes('open championship') ||
-                    e.name.toLowerCase().includes('royal birkdale')))
+                    String(e.id) === '401811964' ||
+                    (e.name && e.name.toLowerCase().includes('tour championship'))
                 );
-                if (!openEvent) throw new Error('The Open event is not available');
+                if (!openEvent) throw new Error('TOUR Championship event is not available');
                 return parseESPNEvent(openEvent);
             }
             throw new Error('No event data');
@@ -898,7 +899,7 @@
 
         function parseESPNEvent(event) {
             const golfers = [];
-            const eventName = event.name || 'The Open';
+            const eventName = event.name || 'TOUR Championship';
             let roundInfo = '';
             let eventCurrentRound = null;
             if (event.status) roundInfo = event.status;
@@ -929,17 +930,6 @@
                     let playerStatus = 'active';
                     if (status === 'cut' || (c.status?.type?.id === '3')) playerStatus = 'CUT';
                     else if (status === 'wd' || status === 'withdrawn') playerStatus = 'WD';
-
-                    // Fallback cut detection: ESPN's scoreboard often leaves c.status null
-                    // mid-tournament. Once R3 has started, anyone without a linescore entry
-                    // for period >= 3 missed the cut (The Open cuts after R2).
-                    const hasPostCutRound = Array.isArray(c.linescores)
-                        && c.linescores.some(l => (l?.period || 0) >= 3);
-                    if (playerStatus === 'active'
-                        && currentRound && currentRound >= 3
-                        && !hasPostCutRound) {
-                        playerStatus = 'CUT';
-                    }
 
                     // Compute current-round holes played from the linescores array,
                     // which works whether or not c.status is populated.
@@ -992,88 +982,45 @@
                 }
             }
 
-            const round2Field = golfers.filter(g => g.status !== 'WD');
-            const round2Complete = eventCurrentRound > 2 || (
-                round2Field.length > 0 && round2Field.every(g => g.r2Holes >= 18)
-            );
-
-            // ESPN may not mark missed-cut players until the Round 3 board appears.
-            // Finalize them as soon as every remaining player has completed Round 2.
-            if (round2Complete) {
-                const finalCut = computeCutLine(golfers, { finalized: true });
-                if (finalCut) {
-                    for (const golfer of golfers) {
-                        if (golfer.status === 'active'
-                            && golfer.r2Total !== null
-                            && golfer.r2Total > finalCut.cutLine) {
-                            golfer.status = 'CUT';
-                            golfer.thru = 'CUT';
-                        }
-                    }
-                }
-            }
-
             return {
                 golfers,
                 eventName,
                 roundInfo,
                 currentRound: eventCurrentRound,
-                round2Complete,
+                round2Complete: false,
             };
         }
 
-        // The Open advances the 70 lowest 36-hole scores and ties. While R2 is
-        // active, use each player's current leaderboard score, matching ESPN's
-        // live projected line. Once R2 closes, use only posted two-round totals.
-        function computeCutLine(golfers, { finalized = false } = {}) {
-            const field = golfers.filter(g => g.status !== 'WD');
-            const scores = field
-                .map(g => finalized ? g.r2Total : g.score)
-                .filter(score => Number.isFinite(score) && score !== 999)
-                .sort((a, b) => a - b);
-            if (scores.length < OPEN_CUT_POSITION) return null;
-            return {
-                cutLine: scores[OPEN_CUT_POSITION - 1],
-                finished: field.filter(g => g.r2Holes >= 18).length,
-                total: field.length,
-                finalized,
-            };
-        }
+        // The 30-player TOUR Championship is a no-cut event.
+        function computeCutLine() { return null; }
 
         // === ODDS + PROBABILITY ===
         // GitHub Pages serves this static page; Vercel only proxies odds so the
         // browser never receives ODDS_API_KEY.
-        const ODDS_ENDPOINT = "https://british-open-odds-proxy.vercel.app/api/odds";
-        const ODDS_LS_KEY = "british_open_odds_v1";
+        const ODDS_ENDPOINT = "";
+        const ODDS_LS_KEY = "tour_championship_odds_v1";
         const ODDS_CLIENT_CACHE_MS = 14 * 60 * 1000;  // slightly under proxy's play-hours TTL
         const FALLBACK_AMERICAN_ODDS = [
-            ["Scottie Scheffler", 590],
-            ["Rory McIlroy", 760],
-            ["Jon Rahm", 1550],
-            ["Matt Fitzpatrick", 2100],
-            ["Tommy Fleetwood", 2100],
-            ["Xander Schauffele", 2200],
-            ["Chris Gotterup", 2800],
-            ["Cameron Young", 2800],
-            ["Ludvig Åberg", 3100],
-            ["Collin Morikawa", 3100],
-            ["Tyrrell Hatton", 3700],
-            ["Robert MacIntyre", 4100],
-            ["Wyndham Clark", 4200],
-            ["Sam Burns", 4200],
-            ["Bryson DeChambeau", 4300],
-            ["Viktor Hovland", 4500],
-            ["Justin Rose", 4700],
-            ["Russell Henley", 5400],
-            ["Tom Kim", 6400],
-            ["Shane Lowry", 7000],
-            ["Alex Fitzpatrick", 10500],
-            ["Akshay Bhatia", 11500],
+            ["Scottie Scheffler", 310], ["Rory McIlroy", 950],
+            ["Xander Schauffele", 1200], ["Wyndham Clark", 1600],
+            ["Sam Burns", 1800], ["Patrick Cantlay", 1800],
+            ["Ludvig Åberg", 2000], ["Tommy Fleetwood", 2000],
+            ["Cameron Young", 2000], ["Collin Morikawa", 2000],
+            ["Matt Fitzpatrick", 2200], ["Chris Gotterup", 2200],
+            ["Viktor Hovland", 2700], ["Si Woo Kim", 2700],
+            ["Hideki Matsuyama", 3000], ["Russell Henley", 3000],
+            ["Ryan Gerard", 4000], ["J.J. Spaun", 4000],
+            ["Robert MacIntyre", 4000], ["Justin Rose", 4000],
+            ["Min Woo Lee", 4500], ["Tom Kim", 4500],
+            ["Adam Scott", 4500], ["Gary Woodland", 4500],
+            ["Kristoffer Reitan", 6000], ["Alex Smalley", 6500],
+            ["Jacob Bridgeman", 8000], ["Ryan Fox", 10000],
+            ["Akshay Bhatia", 10000], ["Alex Fitzpatrick", 10000],
         ];
         const SIM_N = 10000;
         const SIGMA_PER_ROUND = 2.2;
         const FALLBACK_WIN_PROB = 0.002;
-        const PRE_CUT_LINE = 2;  // projected cut line in strokes-to-par before R2 finishes
+        const PRE_CUT_LINE = 999;  // no cut at the TOUR Championship
         let oddsState = { payload: null, ts: 0, error: null };
 
         function americanOddsToProb(line) {
@@ -1429,23 +1376,8 @@
             document.getElementById('roundInfo').textContent =
                 `${eventName}${roundInfo ? ' \u2014 ' + roundInfo : ''}`;
 
-            // Match ESPN's current top-70-and-ties cut line, then lock it once R2 ends.
             const cutEl = document.getElementById('cutLineInfo');
-            if (currentRound >= 2 || round2Complete) {
-                const cut = computeCutLine(golfers, { finalized: round2Complete });
-                if (cut) {
-                    const label = cut.finalized ? 'Cut line' : 'Projected cut';
-                    const detail = cut.finalized
-                        ? 'Final after R2'
-                        : `${cut.finished} of ${cut.total} through R2`;
-                    cutEl.textContent = `${label}: ${formatScore(cut.cutLine)} (${detail})`;
-                    cutEl.classList.remove('hidden');
-                } else {
-                    cutEl.classList.add('hidden');
-                }
-            } else {
-                cutEl.classList.add('hidden');
-            }
+            cutEl.classList.add('hidden');
 
             const poolResults = POOL.map(entry => {
                 const matched = entry.picks.map(pick => {
@@ -1456,10 +1388,11 @@
                 });
 
                 const bestGolfer = matched.reduce((a, b) => a.score <= b.score ? a : b);
-                const teamEligible = matched.every(g => g.status === 'active');
+                const teamPending = matched.some(g => g.notFound);
+                const teamEligible = !teamPending && matched.every(g => g.status === 'active');
                 const teamScore = teamEligible ? matched.reduce((sum, g) => sum + g.score, 0) : null;
 
-                return { owner: entry.owner, golfers: matched, bestGolfer, teamScore, teamEligible };
+                return { owner: entry.owner, golfers: matched, bestGolfer, teamScore, teamEligible, teamPending };
             });
 
             const hasProbs = probs && probs.hasOdds;
@@ -1526,7 +1459,8 @@
                         <div class="card-golfers">
                             ${entry.golfers.map(g => golferTagHTML(g, false, golferProbs[g.pickName])).join('')}
                         </div>
-                        ${!entry.teamEligible ? `<div class="ineligible-note">Team eliminated &mdash; ${entry.golfers.filter(g => g.status === 'CUT' || g.status === 'WD').map(g => g.pickName + ' ' + (g.status === 'CUT' ? 'missed cut' : 'WD')).join(', ')}. Team prize requires both golfers to make the cut.</div>` : ''}
+                        ${entry.teamPending ? '<div class="ineligible-note">Third-round draft pick pending.</div>' : ''}
+                        ${!entry.teamPending && !entry.teamEligible ? '<div class="ineligible-note">Team score unavailable due to a withdrawal.</div>' : ''}
                     </div>
                     <div class="card-score">
                         <div class="score-value ${sClass}">${scoreText}</div>
@@ -1649,8 +1583,8 @@
                         const missing = POOL.reduce((acc, e) =>
                             acc + e.picks.filter(p => !oddsMap.has(p)).length, 0);
                         oddsStatusEl.textContent = missing > 0
-                            ? `Pool projections combine live scores with player-strength estimates. ${missing} golfer(s) use a longshot baseline. These are not tournament outright odds.`
-                            : 'Pool projections combine live scores with player-strength estimates. These are not tournament outright odds.';
+                            ? `Pool projections use the Aug. 26 tournament-odds snapshot and live scores. ${missing} pending or unmatched pick(s) use a longshot baseline. These are not tournament outright odds.`
+                            : 'Pool projections use the Aug. 26 tournament-odds snapshot and live scores. These are not tournament outright odds.';
                     }
                 } else {
                     oddsStatusEl.classList.add('hidden');
